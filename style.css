@@ -1,0 +1,14 @@
+:root { --neon: #33c95c; --bg: #050505; --panel: rgba(20, 20, 20, 0.95); --glow: 0 0 15px rgba(51, 201, 92, 0.4); }
+
+body { background: var(--bg); color: white; margin: 0; display: flex; height: 100vh; overflow: hidden; font-family: 'Inter', sans-serif; }
+.orbitron { font-family: 'Orbitron', sans-serif; }
+
+.card { background: var(--panel); border: 1px solid #222; border-radius: 20px; padding: 20px; box-shadow: var(--glow); position: relative; }
+
+.btn-neon { font-family: 'Orbitron'; font-weight: 900; border: none; border-radius: 10px; cursor: pointer; transition: 0.3s; text-transform: uppercase; }
+.btn-neon:hover { transform: translateY(-2px); box-shadow: 0 0 20px var(--neon); }
+
+.pill { background: rgba(255,255,255,0.03); border: 1px solid #222; padding: 8px 15px; border-radius: 8px; border-left: 3px solid var(--neon); display: flex; align-items: center; }
+
+.spinner { width: 30px; height: 30px; border: 2px solid var(--neon); border-radius: 50%; border-top-color: transparent; animation: spin 2s linear infinite; }
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }

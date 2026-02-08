@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>EV Maximizer - Login</title>
+    <link rel="icon" type="image/png" href="logotop.png">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Inter:wght@400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body { display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .login-card { width: 320px; text-align: center; padding: 40px; }
+        input { width: 100%; padding: 12px; margin: 10px 0; background: #000; border: 1px solid #333; color: white; border-radius: 8px; box-sizing: border-box; outline: none; }
+        input:focus { border-color: var(--neon); }
+    </style>
+</head>
+<body>
+    <div class="card login-card">
+        <img src="logotop.png" alt="Logo" style="width: 120px; margin-bottom: 20px;">
+        <h1 class="orbitron" style="color: var(--neon); font-size: 20px; margin-bottom: 30px;">EV MAXIMIZER</h1>
+        <input type="text" id="user" placeholder="Username">
+        <input type="password" id="pass" placeholder="Password">
+        <button class="btn-neon" style="width: 100%; padding: 12px; margin-top: 10px;" onclick="handleLogin()">ENTER SYSTEM</button>
+    </div>
+
+    <script>
+        async function handleLogin() {
+            const user = document.getElementById('user').value;
+            const pass = document.getElementById('pass').value;
+            const scriptURL = "https://script.google.com/macros/s/AKfycby0fNl6WBi1iTIJASEnQlnjLLYHMwjmMBl4nzy4EAHr6e71PM3bHGAij462Xvdzgb_97w/exec"; 
+
+            try {
+                const response = await fetch(scriptURL + "?action=processLogin&username=" + encodeURIComponent(user) + "&pass=" + encodeURIComponent(pass));
+                const data = await response.json();
+                
+                if(data.status === "success") {
+                    localStorage.setItem('ev_user', JSON.stringify(data));
+                    window.location.href = "dashboard.html";
+                } else {
+                    alert("Credenziali errate o utente non trovato.");
+                }
+            } catch (e) {
+                alert("Errore di connessione al database.");
+            }
+        }
+    </script>
+</body>
+</html>
