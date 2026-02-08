@@ -26,7 +26,7 @@
         async function handleLogin() {
             const user = document.getElementById('user').value;
             const pass = document.getElementById('pass').value;
-            const scriptURL = "https://script.google.com/macros/s/AKfycby0fNl6WBi1iTIJASEnQlnjLLYHMwjmMBl4nzy4EAHr6e71PM3bHGAij462Xvdzgb_97w/exec"; 
+            const scriptURL = "https://script.google.com/macros/s/AKfycbwp-Y8FVTO6wJFbhZ-Pma-_9fU-4lu3zWSbXrlFd4qDZ9Qt8KB46zs8c1Hws64GEWx7BQ/exec"; 
 
             try {
                 const response = await fetch(scriptURL + "?action=processLogin&username=" + encodeURIComponent(user) + "&pass=" + encodeURIComponent(pass));
