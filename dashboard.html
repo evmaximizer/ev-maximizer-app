@@ -4,70 +4,155 @@
     <meta charset="UTF-8">
     <title>EV Maximizer - Dashboard</title>
     <link rel="icon" type="image/png" href="logotop.png">
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <style>
+        :root { --neon: #33c95c; --bg: #050505; --card-bg: #0f0f0f; }
+        body { background: var(--bg); color: white; font-family: 'Share Tech Mono', monospace; margin: 0; display: flex; height: 100vh; overflow: hidden; }
+        
+        .sidebar { width: 300px; background: #000; border-right: 1px solid #1a1a1a; padding: 25px; display: flex; flex-direction: column; }
+        .main-content { flex-grow: 1; display: flex; flex-direction: column; overflow-y: auto; }
+        
+        .card { background: var(--card-bg); border: 1px solid #222; border-radius: 12px; padding: 20px; transition: 0.3s; }
+        .card:hover { border-color: var(--neon); box-shadow: 0 0 15px rgba(51, 201, 92, 0.1); }
+        
+        .pill { padding: 5px 15px; border-radius: 20px; display: flex; align-items: center; }
+        .btn-neon { 
+            background: transparent; border: 1px solid var(--neon); color: var(--neon); 
+            font-family: 'Orbitron'; cursor: pointer; transition: 0.3s; text-transform: uppercase;
+        }
+        .btn-neon:hover { background: var(--neon); color: black; box-shadow: 0 0 20px var(--neon); }
+
+        /* Stile Calendario Cyber */
+        .input-cyber {
+            background: #000; border: 1px solid #333; color: #fff; padding: 10px;
+            font-family: 'Share Tech Mono'; border-radius: 5px; width: 100%; outline: none; margin-top: 5px;
+        }
+        .input-cyber:focus { border-color: #00e5ff; box-shadow: 0 0 10px rgba(0, 229, 255, 0.2); }
+    </style>
 </head>
 <body>
 
-  <aside class="sidebar" style="width: 350px; background: #0f0f0f; border-right: 1px solid #222; display: flex; flex-direction: column; padding: 25px; box-sizing: border-box;">
-    <div style="text-align: center; margin-bottom: 30px; padding: 15px; border: 1px solid var(--neon); border-radius: 10px; box-shadow: var(--glow);">
-      <img src="logotop.png" style="width: 100px; height: auto; margin-bottom: 10px;">
-      <h1 class="orbitron" style="color: var(--neon); font-size: 18px; margin:0; letter-spacing: 1px;">EV MAXIMIZER</h1>
+  <aside class="sidebar">
+    <div style="text-align: center; margin-bottom: 40px;">
+      <img src="logotop.png" style="width: 80px; filter: drop-shadow(0 0 5px var(--neon));">
+      <h1 class="orbitron" style="color: var(--neon); font-size: 16px; margin-top: 15px;">EV MAXIMIZER</h1>
     </div>
     
-    <div class="monitor" style="width: 100%; aspect-ratio: 9/16; background: #000; border: 1px solid var(--neon); border-radius: 15px; position: relative; margin-bottom: 20px; overflow: hidden;">
-      <div style="position: absolute; top: 10px; left: 10px; font-size: 8px; color: var(--neon); border: 1px solid var(--neon); padding: 2px 5px; border-radius: 3px; font-family: 'Orbitron';">EVO COACH</div>
-      <div id="evo-display" style="height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-         <div class="spinner"></div>
-         <p style="font-family: 'Orbitron'; font-size: 9px; color: var(--neon); margin-top: 15px; letter-spacing: 1px;">EVO READY</p>
-      </div>
+    <nav style="flex-grow: 1;">
+        <div class="orbitron" style="font-size: 10px; color: #444; margin-bottom: 15px;">MENU OPERATIVO</div>
+        <div style="color: var(--neon); margin-bottom: 15px; cursor: pointer;">> DASHBOARD</div>
+        <div style="color: #666; margin-bottom: 15px; cursor: pointer;">> MY SESSIONS</div>
+        <div style="color: #666; margin-bottom: 15px; cursor: pointer;">> EVO COACH (AI)</div>
+    </nav>
+
+    <div class="card" style="padding: 15px; border-color: #333;">
+        <span class="orbitron" style="font-size: 9px; color: #666;">ASSISTENZA BETA</span>
+        <button class="btn-neon" style="width: 100%; margin-top: 10px; font-size: 10px;">APRI DISCORD</button>
     </div>
-    
-    <button class="btn-neon" style="padding: 15px; margin-bottom: 10px;" onclick="alert('Analisi in arrivo...')">Avvia Analisi EVO</button>
-    <button class="btn-neon" style="background:transparent; color:var(--neon); border:1px solid var(--neon); padding: 12px; font-size: 10px;">Download Software</button>
-    
-    <div style="margin-top: auto; font-size: 9px; color: #333; text-align: center; font-family: 'Orbitron';">v 1.1.0 BETA</div>
   </aside>
 
-  <main style="flex-grow: 1; display: flex; flex-direction: column; background: radial-gradient(circle at top right, #0d1a0d, #050505);">
-    <div style="height: 70px; display: flex; align-items: center; justify-content: space-between; padding: 0 30px; border-bottom: 1px solid #1a1a1a;">
-      <div class="orbitron" style="font-size: 12px; color: #444;">PLAYER: <span id="user-id" style="color:white;">---</span></div>
-      <div style="display: flex; gap: 15px;">
-        <div class="pill">
-          <span style="font-size: 9px; color: #666; font-family: 'Orbitron';">LICENZA</span>
-          <span id="licenza-val" style="color: var(--neon); font-family: 'Orbitron'; font-weight: 700; margin-left: 10px;">---</span>
+  <main class="main-content">
+    
+    <div style="height: 80px; display: flex; align-items: center; justify-content: space-between; padding: 0 40px; border-bottom: 1px solid #1a1a1a; background: #000;">
+      <div class="orbitron" style="font-size: 11px; color: #666;">OPERATORE: <span id="user-display" style="color: var(--neon);">---</span></div>
+      
+      <div style="display: flex; gap: 20px;">
+        <div class="pill" style="border: 1px solid #333; background: #0a0a0a;">
+          <span style="font-size: 9px; color: #666; font-family: 'Orbitron';">PIANO:</span>
+          <span id="plan-display" style="color: white; font-family: 'Orbitron'; font-weight: 700; margin-left: 10px;">BETA TESTER</span>
         </div>
-        <div class="pill">
-          <span style="font-size: 9px; color: #666; font-family: 'Orbitron';">TOKEN</span>
-          <span id="token-val" style="color: var(--neon); font-family: 'Orbitron'; font-weight: 700; margin-left: 10px;">---</span>
+        <div class="pill" style="border: 1px solid #00e5ff33; background: #00e5ff05;">
+          <span style="font-size: 9px; color: #666; font-family: 'Orbitron';">TOKEN:</span>
+          <span id="token-display" style="color: #00e5ff; font-family: 'Orbitron'; font-weight: 900; margin-left: 10px; text-shadow: 0 0 10px #00e5ff;">500</span>
         </div>
       </div>
     </div>
 
-    <div style="display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 180px; gap: 20px; padding: 25px; flex-grow: 1;">
-      <div class="card"><span class="orbitron" style="font-size: 10px; color: var(--neon); opacity: 0.5;">HAND REPLAYER</span></div>
-      <div class="card"><span class="orbitron" style="font-size: 10px; color: var(--neon); opacity: 0.5;">VISUAL REPORTS</span></div>
-      <div class="card" style="grid-column: span 2;">
-        <span class="orbitron" style="font-size: 10px; color: var(--neon); opacity: 0.5; margin-bottom: 15px; display: block;">SHOP & PROMO</span>
-        <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02); padding: 15px; border-radius: 12px; border: 1px solid #222;">
-            <div>
-                <p class="orbitron" style="margin:0; font-size: 13px; color:white;">PROMO BETA</p>
-                <p style="margin:5px 0 0; font-size: 11px; color:#666;">10 Analisi tecniche EVO</p>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 25px; padding: 35px; flex-grow: 1;">
+      
+      <div style="display: flex; flex-direction: column; gap: 25px;">
+        
+        <div class="card" id="drop-zone" style="border: 2px dashed #33c95c44; text-align: center; padding: 40px;">
+            <div class="orbitron" style="font-size: 10px; color: var(--neon); margin-bottom: 20px;">MODULO CARICAMENTO MANI</div>
+            <div style="font-size: 30px; margin-bottom: 10px;">📥</div>
+            <p style="font-size: 12px; color: #888;">Trascina qui il file PokerStars/iPoker</p>
+            <div id="upload-status" class="orbitron" style="font-size: 10px; color: #00e5ff; margin-top: 15px; display: none;">SINCRO IN CORSO...</div>
+        </div>
+
+        <div class="card">
+            <div class="orbitron" style="font-size: 10px; color: #00e5ff; margin-bottom: 15px;">FILTRO DATABASE TEMPORALE</div>
+            <div style="display: flex; gap: 15px; margin-bottom: 20px;">
+                <div style="flex: 1;">
+                    <label style="font-size: 10px; color: #555;">DATA INIZIO</label>
+                    <input type="date" class="input-cyber" id="date-start">
+                </div>
+                <div style="flex: 1;">
+                    <label style="font-size: 10px; color: #555;">DATA FINE</label>
+                    <input type="date" class="input-cyber" id="date-end">
+                </div>
             </div>
-            <div style="font-family: 'Orbitron'; font-weight: 900; color: var(--neon); font-size: 18px;">€39</div>
-            <button class="btn-neon" style="padding: 8px 20px; font-size: 10px; background: white; color: black;">BUY</button>
+            <button class="btn-neon" onclick="filterData()" style="width: 100%; border-color: #00e5ff; color: #00e5ff;">APPLICA FILTRO DATABASE</button>
         </div>
       </div>
+
+      <div style="display: flex; flex-direction: column; gap: 25px;">
+        <div class="card" style="flex-grow: 1; border-color: #333;">
+            <div class="orbitron" style="font-size: 10px; color: #444;">ANTEPRIMA REPORT VISUALE</div>
+            <div style="height: 100%; display: flex; align-items: center; justify-content: center; color: #222;">
+                <span class="orbitron">In attesa di dati...</span>
+            </div>
+        </div>
+      </div>
+
+      <div class="card" style="grid-column: span 2; background: linear-gradient(90deg, #000, #051005);">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <span class="orbitron" style="font-size: 12px; color: white;">POTENZIA IL TUO TERMINALE ANALITICO</span>
+                <p style="font-size: 11px; color: #33c95c; margin: 5px 0 0;">Acquista un Baule Token per sbloccare l'Avatar EVO</p>
+            </div>
+            <div style="display: flex; align-items: center; gap: 30px;">
+                <div class="orbitron" style="text-align: right;">
+                    <div style="font-size: 9px; color: #666;">PROMO BETA</div>
+                    <div style="font-size: 22px; color: white;">€39 / 500 TK</div>
+                </div>
+                <button class="btn-neon" style="padding: 12px 30px;">REFILL TOKEN</button>
+            </div>
+        </div>
+      </div>
+
     </div>
   </main>
 
   <script>
-    const data = JSON.parse(localStorage.getItem('ev_user'));
-    if(!data) { window.location.href = "index.html"; }
-    else {
-        document.getElementById('user-id').innerText = data.nickname;
-        document.getElementById('licenza-val').innerText = data.licenza;
-        document.getElementById('token-val').innerText = data.token;
+    // Caricamento dati utente dal localStorage (quelli salvati al login)
+    window.onload = function() {
+        const userData = JSON.parse(localStorage.getItem('ev_user'));
+        if(userData) {
+            document.getElementById('user-display').innerText = userData.username || 'USER_UNK';
+            document.getElementById('token-display').innerText = userData.tokens || '500';
+        }
+    }
+
+    // Gestione Drag & Drop
+    const dropZone = document.getElementById('drop-zone');
+    const status = document.getElementById('upload-status');
+
+    dropZone.ondragover = (e) => { e.preventDefault(); dropZone.style.borderColor = '#33c95c'; };
+    dropZone.ondragleave = () => { dropZone.style.borderColor = '#33c95c44'; };
+    dropZone.ondrop = (e) => {
+        e.preventDefault();
+        status.style.display = 'block';
+        setTimeout(() => {
+            alert("Analisi di 60.000 mani completata. Leak rilevati: 14. Generazione grafici...");
+            status.innerText = "SINCRO COMPLETATA - 100%";
+        }, 2000);
+    };
+
+    function filterData() {
+        const start = document.getElementById('date-start').value;
+        const end = document.getElementById('date-end').value;
+        alert("Interrogazione database per il periodo: " + start + " / " + end);
     }
   </script>
 </body>
