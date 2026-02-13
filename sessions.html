@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>EV Maximizer - My Sessions</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        :root { --neon: #33c95c; --bg: #050505; --card-bg: #0f0f0f; --cyan: #00e5ff; }
+        body { background: var(--bg); color: white; font-family: 'Share Tech Mono', monospace; margin: 0; display: flex; height: 100vh; }
+        .sidebar { width: 300px; background: #000; border-right: 1px solid #1a1a1a; padding: 25px; display: flex; flex-direction: column; }
+        .main-content { flex-grow: 1; padding: 40px; overflow-y: auto; }
+        .nav-item { color: #666; margin-bottom: 15px; cursor: pointer; font-family: 'Orbitron'; font-size: 11px; }
+        .nav-item.active { color: var(--neon); }
+        
+        /* Badge & Pill */
+        .badge-owner { background: var(--neon); color: black; padding: 2px 8px; border-radius: 3px; font-weight: bold; font-size: 10px; margin-left: 10px; }
+        .badge-rank { border: 1px solid #cd7f32; color: #cd7f32; padding: 2px 8px; border-radius: 3px; font-size: 10px; margin-left: 10px; font-weight: 900; }
+
+        /* Room Tabs Style */
+        .room-tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+        .tab-btn { background: transparent; border: 1px solid #1a1a1a; color: #444; padding: 8px 20px; cursor: pointer; font-family: 'Orbitron'; font-size: 9px; transition: 0.3s; }
+        .tab-btn.active { border-color: var(--cyan); color: var(--cyan); box-shadow: 0 0 10px rgba(0, 229, 255, 0.2); }
+
+        /* Table & Inputs */
+        .input-terminal { background: #000; border: 1px solid #1a1a1a; color: var(--neon); font-family: 'Share Tech Mono'; padding: 8px; font-size: 12px; }
+        table { width: 100%; border-collapse: collapse; background: var(--card-bg); margin-bottom: 30px; }
+        th { text-align: left; padding: 15px; border-bottom: 2px solid #1a1a1a; color: #444; font-family: 'Orbitron'; font-size: 10px; }
+        td { padding: 15px; border-bottom: 1px solid #111; font-size: 13px; }
+
+        .btn-evo { background: transparent; border: 1px solid var(--cyan); color: var(--cyan); padding: 5px 12px; cursor: pointer; font-family: 'Orbitron'; font-size: 9px; }
+        
+        /* Grafico Fisso */
+        #main-graph-container { padding: 25px; background: var(--card-bg); border: 1px solid #1a1a1a; height: 400px; position: relative; }
+    </style>
+</head>
+<body onload="initSessions()">
+    <div class="sidebar">
+        <div style="margin-bottom: 50px;">
+            <img src="logotop.png" style="width: 40px;">
+            <div class="orbitron" style="font-size: 16px; margin-top: 10px;">EV_MAXIMIZER</div>
+        </div>
+        <nav>
+            <div class="nav-item" onclick="location.href='dashboard.html'">> DASHBOARD</div>
+            <div class="nav-item active">> MY SESSIONS</div>
+            <div class="nav-item" onclick="location.href='evo.html'">> EVO COACH (AI)</div>
+            <div class="nav-item" onclick="location.href='settings.html'">> ACCOUNT SETTINGS</div>
+        </nav>
+    </div>
+
+    <div class="main-content">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px;">
+            <div>
+                <div class="orbitron" style="font-size: 24px;">SESSION_HISTORY_LOG</div>
+                <div style="margin-top: 15px; display: flex; gap: 10px;">
+                    <input type="date" id="date-from" class="input-terminal">
+                    <input type="date" id="date-to" class="input-terminal">
+                </div>
+            </div>
+            <div style="display: flex; align-items: center;">
+                <span id="rank-badge" class="badge-rank">BRONZE_BETA</span>
+                <div class="pill" style="margin-left: 10px; background: rgba(0,0,0,0.5); border: 1px solid #1a1a1a; padding: 5px 15px; border-radius: 4px;">
+                    <span id="user-display" style="font-family: 'Orbitron'; font-size: 12px;">USER</span>
+                    <span class="badge-owner">OWNER</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="room-tabs">
+            <button class="tab-btn active" onclick="filterByRoom('ALL', this)">ALL_NETWORKS</button>
+            <button class="tab-btn" onclick="filterByRoom('PS', this)">POKERSTARS</button>
+            <button class="tab-btn" onclick="filterByRoom('IPOKER', this)">IPOKER</button>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>TIMESTAMP</th>
+                    <th>PLATFORM</th>
+                    <th>HANDS</th>
+                    <th>NET_PROFIT</th>
+                    <th>EV_EXPECTED</th>
+                    <th>ANALYSIS</th>
+                </tr>
+            </thead>
+            <tbody id="sessions-body">
+                </tbody>
+        </table>
+
+        <div id="main-graph-container">
+            <div class="orbitron" style="font-size: 10px; color: var(--neon); margin-bottom: 20px;">
+                PERFORMANCE_GRAPH // <span id="current-room-label">ALL_NETWORKS</span>
+            </div>
+            <div style="height: 320px;">
+                <canvas id="mainChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let mainChart = null;
+
+        function initSessions() {
+            const userData = JSON.parse(localStorage.getItem('ev_user'));
+            if(userData) {
+                document.getElementById('user-display').innerText = userData.username.toUpperCase();
+                document.getElementById('rank-badge').innerText = (userData.status || 'BRONZE_BETA').toUpperCase();
+            }
+            updateUI('ALL');
+        }
+
+        function filterByRoom(room, btn) {
+            // Update buttons style
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById('current-room-label').innerText = room === 'ALL' ? 'ALL_NETWORKS' : room;
+            updateUI(room);
+        }
+
+        function updateUI(room) {
+            const tbody = document.getElementById('sessions-body');
+            // Qui simuli il cambio dati in base alla room
+            if(room === 'PS') {
+                tbody.innerHTML = `<tr><td>2026-02-13 14:30</td><td>POKERSTARS</td><td>452</td><td style="color:var(--neon)">+€142.50</td><td>+€115.00</td><td><button class="btn-evo">EVO_REVIEW</button></td></tr>`;
+                renderGraph([0, 10, 40, 80, 142]); // Dati solo PS
+            } else if(room === 'IPOKER') {
+                tbody.innerHTML = `<tr><td>2026-02-12 21:15</td><td>IPOKER</td><td>128</td><td style="color:#ff4444">-€34.20</td><td>-€12.00</td><td><button class="btn-evo">EVO_REVIEW</button></td></tr>`;
+                renderGraph([0, -10, -20, -34]); // Dati solo iPoker
+            } else {
+                tbody.innerHTML = `
+                    <tr><td>2026-02-13 14:30</td><td>POKERSTARS</td><td>452</td><td style="color:var(--neon)">+€142.50</td><td>+€115.00</td><td><button class="btn-evo">EVO_REVIEW</button></td></tr>
+                    <tr><td>2026-02-12 21:15</td><td>IPOKER</td><td>128</td><td style="color:#ff4444">-€34.20</td><td>-€12.00</td><td><button class="btn-evo">EVO_REVIEW</button></td></tr>`;
+                renderGraph([0, 30, 20, 100, 108]); // Dati combinati
+            }
+        }
+
+        function renderGraph(dataPoints) {
+            const ctx = document.getElementById('mainChart').getContext('2d');
+            if(mainChart) mainChart.destroy();
+            
+            mainChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: dataPoints.map((_, i) => i),
+                    datasets: [{
+                        label: 'Net Profit',
+                        data: dataPoints,
+                        borderColor: '#33c95c',
+                        backgroundColor: 'rgba(51, 201, 92, 0.1)',
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { grid: { color: '#1a1a1a' }, ticks: { color: '#444' } },
+                        x: { grid: { display: false }, ticks: { color: '#444' } }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+    </script>
+</body>
+</html>

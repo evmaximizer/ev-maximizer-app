@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>EV Maximizer - EVO Coach AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        :root { --neon: #33c95c; --bg: #050505; --card-bg: #0f0f0f; --cyan: #00e5ff; }
+        body { background: var(--bg); color: white; font-family: 'Share Tech Mono', monospace; margin: 0; display: flex; height: 100vh; overflow: hidden; }
+        
+        .sidebar { width: 300px; background: #000; border-right: 1px solid #1a1a1a; padding: 25px; display: flex; flex-direction: column; }
+        .nav-item { color: #666; margin-bottom: 15px; cursor: pointer; font-family: 'Orbitron'; font-size: 11px; }
+        .nav-item.active { color: var(--neon); }
+
+        .main-content { flex-grow: 1; display: flex; flex-direction: column; padding: 30px; }
+        .evo-container { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; flex-grow: 1; align-items: start; }
+
+        /* AVATAR BOX (SINISTRA) */
+        .video-box { 
+            background: #000; 
+            border: 1px solid var(--neon); 
+            aspect-ratio: 16/9; 
+            position: relative; 
+            box-shadow: 0 0 20px rgba(51, 201, 92, 0.1);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .video-box::before { content: "LIVE_AVATAR_FEED"; position: absolute; top: 10px; left: 10px; font-family: 'Orbitron'; font-size: 9px; color: var(--neon); }
+
+        /* REVIEW BOX (DESTRA) */
+        .review-box { background: var(--card-bg); border: 1px solid #1a1a1a; height: 100%; padding: 20px; display: flex; flex-direction: column; }
+        .hand-replayer-placeholder { flex-grow: 1; background: #0a0a0a; border: 1px solid #1a1a1a; margin-top: 15px; display: flex; align-items: center; justify-content: center; color: #333; font-family: 'Orbitron'; }
+
+        .coach-speech { background: rgba(0,0,0,0.8); border-left: 3px solid var(--cyan); padding: 15px; margin-top: 20px; font-size: 14px; color: var(--cyan); min-height: 80px; }
+        .btn-action { background: var(--neon); color: black; border: none; padding: 12px; font-family: 'Orbitron'; font-weight: 900; cursor: pointer; width: 100%; margin-top: 10px; }
+    </style>
+</head>
+<body onload="initEvo()">
+    <div class="sidebar">
+        <div style="margin-bottom: 50px;">
+            <img src="logotop.png" style="width: 40px;">
+            <div class="orbitron" style="font-size: 16px; margin-top: 10px;">EV_MAXIMIZER</div>
+        </div>
+        <nav>
+            <div class="nav-item" onclick="location.href='dashboard.html'">> DASHBOARD</div>
+            <div class="nav-item" onclick="location.href='sessions.html'">> MY SESSIONS</div>
+            <div class="nav-item active">> EVO COACH (AI)</div>
+            <div class="nav-item" onclick="location.href='settings.html'">> ACCOUNT SETTINGS</div>
+        </nav>
+    </div>
+
+    <div class="main-content">
+        <div style="margin-bottom: 20px; display: flex; justify-content: space-between;">
+            <div class="orbitron" style="font-size: 20px; color: var(--neon);">EVO_ARTIFICIAL_INTELLIGENCE_COACH</div>
+            <div id="token-status" style="font-size: 12px; color: var(--cyan); font-family: 'Orbitron';">CREDITS: 100</div>
+        </div>
+
+        <div class="evo-container">
+            <div class="video-container">
+                <div class="video-box" id="avatar-video">
+                    <div class="orbitron" style="color: #222; text-align: center;">[AVATAR_READY]<br><span style="font-size: 8px;">AWAITING_REPLAY_SELECTION</span></div>
+                </div>
+                <div class="coach-speech">
+                    <span style="color: #666;">EVO_VOICE_OUT:</span><br>
+                    <span id="speech-text">Seleziona una mano dalla cronologia sessioni per iniziare la coaching session. Analizzerò i tuoi leak in tempo reale.</span>
+                </div>
+            </div>
+
+            <div class="review-box">
+                <div class="orbitron" style="font-size: 10px; color: #444;">TECHNICAL_ANALYSIS_REPLAYER</div>
+                <div class="hand-replayer-placeholder" id="replayer">
+                    [WAITING_FOR_HAND_DATA]
+                </div>
+                <div style="margin-top: 20px;">
+                    <div class="orbitron" style="font-size: 10px; color: #444; margin-bottom: 10px;">LEAK_PROBABILITY</div>
+                    <div style="width: 100%; height: 4px; background: #1a1a1a;">
+                        <div id="leak-bar" style="width: 0%; height: 100%; background: #ff4444; transition: 1s;"></div>
+                    </div>
+                </div>
+                <button class="btn-action" onclick="startAnalysis()">AVVIA ANALISI MANO (1 GETTONE)</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let tokens = 100;
+        function initEvo() {
+            const userData = JSON.parse(localStorage.getItem('ev_user'));
+            if(userData) {
+                tokens = userData.tokens || 100;
+                document.getElementById('token-status').innerText = "CREDITS: " + tokens;
+            }
+        }
+
+        function startAnalysis() {
+            if(tokens <= 0) {
+                alert("Gettoni insufficienti. Ricarica in Account Settings.");
+                return;
+            }
+            if(confirm("Confermi di voler scalare 1 gettone per questa analisi?")) {
+                tokens--;
+                document.getElementById('token-status').innerText = "CREDITS: " + tokens;
+                document.getElementById('speech-text').innerText = "Analisi avviata. In questa mano hai giocato fuori posizione contro un range forte. Il tuo check-call al flop è sub-ottimale...";
+                document.getElementById('leak-bar').style.width = "78%";
+                document.getElementById('replayer').innerText = "[REPLAYING_HAND_ID_4829]";
+                document.getElementById('replayer').style.color = "var(--cyan)";
+            }
+        }
+    </script>
+</body>
+</html>

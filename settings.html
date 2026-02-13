@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>EV Maximizer - Account Settings</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        :root { --neon: #33c95c; --bg: #050505; --card-bg: #0f0f0f; --cyan: #00e5ff; }
+        body { background: var(--bg); color: white; font-family: 'Share Tech Mono', monospace; margin: 0; display: flex; height: 100vh; overflow: hidden; }
+        
+        .sidebar { width: 300px; background: #000; border-right: 1px solid #1a1a1a; padding: 25px; display: flex; flex-direction: column; }
+        .main-content { flex-grow: 1; padding: 40px; overflow-y: auto; }
+        .nav-item { color: #666; margin-bottom: 15px; cursor: pointer; font-family: 'Orbitron'; font-size: 11px; }
+        .nav-item.active { color: var(--neon); }
+
+        .settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 30px; }
+        .setting-card { background: var(--card-bg); border: 1px solid #1a1a1a; padding: 25px; position: relative; }
+        
+        .badge-owner { background: var(--neon); color: black; padding: 3px 10px; border-radius: 3px; font-weight: 900; font-size: 10px; margin-left: 10px; }
+        
+        .input-box { background: #000; border: 1px solid #1a1a1a; color: #fff; padding: 12px; width: 100%; margin-top: 10px; font-family: 'Share Tech Mono'; }
+        
+        .btn-save { background: var(--neon); color: #000; border: none; padding: 10px 20px; font-family: 'Orbitron'; font-weight: 900; cursor: pointer; margin-top: 20px; transition: 0.3s; }
+        .btn-save:hover { box-shadow: 0 0 15px var(--neon); }
+
+        .wallet-option { border: 1px solid #1a1a1a; padding: 15px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; cursor: pointer; transition: 0.3s; }
+        .wallet-option:hover { border-color: var(--cyan); background: rgba(0, 229, 255, 0.05); }
+
+        /* Stile Pacchetti Abbonamento */
+        .plan-card-mini { background: rgba(255,255,255,0.02); border: 1px solid #1a1a1a; padding: 20px; text-align: center; transition: 0.3s; }
+        .plan-card-mini:hover { border-color: var(--neon); background: rgba(51, 201, 92, 0.02); }
+        .plan-featured { border-color: var(--neon); background: rgba(51, 201, 92, 0.05); }
+    </style>
+</head>
+<body onload="initSettings()">
+    <div class="sidebar">
+        <div style="margin-bottom: 50px;">
+            <img src="logotop.png" style="width: 40px;">
+            <div class="orbitron" style="font-size: 16px; margin-top: 10px;">EV_MAXIMIZER</div>
+        </div>
+        <nav>
+            <div class="nav-item" onclick="location.href='dashboard.html'">> DASHBOARD</div>
+            <div class="nav-item" onclick="location.href='sessions.html'">> MY SESSIONS</div>
+            <div class="nav-item" onclick="location.href='evo.html'">> EVO COACH (AI)</div>
+            <div class="nav-item active">> ACCOUNT SETTINGS</div>
+        </nav>
+    </div>
+
+    <div class="main-content">
+        <div class="orbitron" style="font-size: 24px; margin-bottom: 10px;">USER_SETTINGS_MODULE</div>
+        <div style="color: #444; font-size: 12px;">MANAGE YOUR SUBSCRIPTION AND SECURE ASSETS</div>
+
+        <div class="settings-grid">
+            <div class="setting-card">
+                <div class="orbitron" style="font-size: 10px; color: var(--neon); margin-bottom: 20px;">CORE_PROFILE</div>
+                <div style="display: flex; align-items: center; margin-bottom: 20px;">
+                    <div style="width: 60px; height: 60px; background: #1a1a1a; border: 1px solid var(--neon); display: flex; align-items: center; justify-content: center; font-size: 24px;">👤</div>
+                    <div style="margin-left: 20px;">
+                        <div id="display-name" class="orbitron" style="font-size: 18px;">USER_NAME</div>
+                        <div style="display: flex; margin-top: 5px;">
+                            <span id="display-rank" style="color: #cd7f32; font-size: 10px; font-weight: 900;">BRONZE</span>
+                            <span class="badge-owner">OWNER</span>
+                        </div>
+                    </div>
+                </div>
+                <label style="font-size: 10px; color: #444;">EMAIL_ADDRESS</label>
+                <input type="text" class="input-box" id="user-email" readonly value="owner@evmaximizer.com">
+            </div>
+
+            <div class="setting-card">
+                <div class="orbitron" style="font-size: 10px; color: var(--cyan); margin-bottom: 20px;">RELOAD_EVO_CREDITS</div>
+                <div style="font-size: 28px; font-weight: 900; margin-bottom: 20px;" id="token-count">100 <span style="font-size: 10px; color: var(--cyan);">GETTONI DISPONIBILI</span></div>
+                
+                <div class="wallet-option" onclick="window.open('https://paypal.com', '_blank')">
+                    <span style="font-size: 12px;">LINK PAYPAL ACCOUNT</span>
+                    <span style="color: #0070ba; font-weight: 900;">PayPal</span>
+                </div>
+                <div class="wallet-option" onclick="window.open('https://coinbase.com', '_blank')">
+                    <span style="font-size: 12px;">CRYPTO WALLET SYNC</span>
+                    <span style="color: var(--cyan); font-weight: 900;">Coinbase</span>
+                </div>
+            </div>
+
+            <div class="setting-card" style="grid-column: span 2;">
+                <div class="orbitron" style="font-size: 10px; color: var(--neon); margin-bottom: 20px;">UPGRADE_STATION // CURRENT_BETA_OFFERS</div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px;">
+                    
+                    <div class="plan-card-mini">
+                        <div class="orbitron" style="font-size: 9px; color: var(--neon); margin-bottom: 5px;">PREZZO_BETA</div>
+                        <div class="orbitron" style="font-size: 11px; color: #fff; margin-bottom: 10px;">STARTER_PACK</div>
+                        <div style="font-size: 24px; color: white; font-weight: 900;">34,99€ <span style="font-size: 10px; color: #444;">/ ANNO</span></div>
+                        <button class="btn-save" style="width: 100%; margin-top: 15px;" onclick="window.open('https://paypal.com', '_blank')">ATTIVA_STARTER</button>
+                    </div>
+
+                    <div class="plan-card-mini plan-featured">
+                        <div class="orbitron" style="font-size: 9px; color: var(--neon); margin-bottom: 5px;">PREZZO_BETA</div>
+                        <div class="orbitron" style="font-size: 11px; color: #fff; margin-bottom: 10px;">FULL_EXPERIENCE</div>
+                        <div style="font-size: 24px; color: white; font-weight: 900;">69,99€ <span style="font-size: 10px; color: #444;">/ ANNO</span></div>
+                        <button class="btn-save" style="width: 100%; margin-top: 15px; background: var(--neon); color: #000;" onclick="window.open('https://coinbase.com', '_blank')">ATTIVA_FULL</button>
+                    </div>
+
+                    <div class="plan-card-mini">
+                        <div class="orbitron" style="font-size: 9px; color: var(--neon); margin-bottom: 5px;">PREZZO_BETA</div>
+                        <div class="orbitron" style="font-size: 11px; color: #fff; margin-bottom: 10px;">GRINDER_ELITE</div>
+                        <div style="font-size: 24px; color: white; font-weight: 900;">99,99€ <span style="font-size: 10px; color: #444;">/ ANNO</span></div>
+                        <button class="btn-save" style="width: 100%; margin-top: 15px;" onclick="window.open('https://paypal.com', '_blank')">ATTIVA_GRINDER</button>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="setting-card">
+                <div class="orbitron" style="font-size: 10px; color: #444; margin-bottom: 20px;">SECURITY_PROTOCOLS</div>
+                <label style="font-size: 10px; color: #444;">NEW_PASSWORD</label>
+                <input type="password" class="input-box" placeholder="********">
+                <button class="btn-save">UPDATE_SECURITY</button>
+            </div>
+
+            <div class="setting-card" style="border-color: var(--neon); background: rgba(51, 201, 92, 0.02);">
+                <div class="orbitron" style="font-size: 10px; color: var(--neon); margin-bottom: 20px;">ACTIVE_SUBSCRIPTION</div>
+                <div class="orbitron" style="font-size: 20px;">BETA_FULL_ACCESS</div>
+                <div style="font-size: 11px; color: #666; margin-top: 10px;">EXPIRES: 12.08.2026</div>
+                <div style="margin-top: 20px; font-size: 12px; color: var(--neon);">STATUS: ACTIVE_LINK</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function initSettings() {
+            const userData = JSON.parse(localStorage.getItem('ev_user'));
+            if(userData) {
+                document.getElementById('display-name').innerText = userData.username.toUpperCase();
+                document.getElementById('display-rank').innerText = (userData.status || 'BRONZE_BETA').toUpperCase();
+                // Assicura la lettura dei tuoi 100 gettoni [cite: 2026-02-08]
+                document.getElementById('token-count').innerHTML = `${userData.tokens || 100} <span style="font-size: 10px; color: var(--cyan);">GETTONI DISPONIBILI</span>`;
+            }
+        }
+    </script>
+</body>
+</html>
