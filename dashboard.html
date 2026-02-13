@@ -7,7 +7,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <style>
-        :root { --neon: #33c95c; --bg: #050505; --card-bg: #0f0f0f; --cyan: #00e5ff; }
+        :root { --neon: #33c95c; --bg: #050505; --card-bg: #0f0f0f; --cyan: #00e5ff; --orange: #ffaa00; }
         body { background: var(--bg); color: white; font-family: 'Share Tech Mono', monospace; margin: 0; display: flex; height: 100vh; overflow: hidden; }
         .sidebar { width: 300px; background: #000; border-right: 1px solid #1a1a1a; padding: 25px; display: flex; flex-direction: column; }
         .nav-item { color: #666; margin-bottom: 15px; cursor: pointer; transition: 0.3s; font-family: 'Orbitron'; font-size: 11px; letter-spacing: 1px; }
@@ -17,12 +17,20 @@
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; border-bottom: 1px solid #1a1a1a; padding-bottom: 20px; }
         .pill { background: rgba(0,0,0,0.5); border: 1px solid #1a1a1a; padding: 8px 15px; border-radius: 4px; display: inline-flex; align-items: center; }
         .orbitron { font-family: 'Orbitron', sans-serif; font-weight: 900; }
-        .dashboard-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+        
+        .dashboard-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
         .card { background: var(--card-bg); border: 1px solid #1a1a1a; padding: 20px; position: relative; overflow: hidden; }
         .card::before { content: ""; position: absolute; top: 0; left: 0; width: 2px; height: 100%; background: var(--neon); }
-        .graph-container { grid-column: span 3; height: 400px; background: #000; border: 1px solid #1a1a1a; padding: 20px; margin-top: 10px; }
+        .card.cyan::before { background: var(--cyan); }
+        .card.orange::before { background: var(--orange); }
+        
+        .graph-container { grid-column: span 4; height: 350px; background: #000; border: 1px solid #1a1a1a; padding: 20px; margin-top: 10px; }
         select { background: transparent; color: var(--cyan); border: none; font-family: 'Orbitron'; font-size: 10px; outline: none; cursor: pointer; }
-        #import-log { grid-column: span 3; background: #000; border: 1px solid #1a1a1a; height: 100px; overflow-y: auto; font-size: 10px; color: var(--neon); padding: 10px; margin-bottom: 10px; }
+        #import-log { grid-column: span 4; background: #000; border: 1px solid #1a1a1a; height: 80px; overflow-y: auto; font-size: 10px; color: var(--neon); padding: 10px; margin-bottom: 10px; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 12px; }
+        th { text-align: left; color: #444; font-family: 'Orbitron'; padding: 10px; border-bottom: 1px solid #1a1a1a; }
+        td { padding: 10px; border-bottom: 1px solid #080808; }
     </style>
 </head>
 <body onload="initDashboard()">
@@ -45,10 +53,10 @@
             <div class="orbitron" style="font-size: 20px;">SYSTEM_DASHBOARD</div>
             <div style="display: flex; gap: 10px; align-items: center;">
                 <div class="pill" style="border-color: var(--cyan);">
-                    <span style="font-size: 9px; color: #444; margin-right: 10px;">EVO_TOKENS:</span>
-                    <span id="token-display" style="color: var(--cyan); font-weight: bold;">100</span>
+                    <span style="font-size: 9px; color: #666; margin-right: 10px;">TOKENS:</span>
+                    <span id="token-display" style="color: var(--cyan); font-weight: bold;">0</span>
                 </div>
-                <button class="pill" style="color: var(--neon); cursor: pointer;" onclick="loadDataFromDB()">REFRESH_DB</button>
+                <button class="pill" style="color: var(--neon); cursor: pointer; background: none; border: 1px solid var(--neon);" onclick="loadDataFromDB()">SYNC_NOW</button>
                 <div class="pill">
                     <span id="user-display" style="font-size: 11px;">USER</span>
                 </div>
@@ -57,43 +65,71 @@
 
         <div class="dashboard-grid">
             <div class="card">
-                <div class="orbitron" style="font-size: 9px; color: #444; margin-bottom: 10px;">SESSION_PROFIT</div>
-                <div style="font-size: 28px; font-weight: 900;" id="total-profit">€ 0.00</div>
+                <div class="orbitron" style="font-size: 9px; color: #444; margin-bottom: 10px;">NET_PROFIT</div>
+                <div style="font-size: 24px; font-weight: 900;" id="total-profit">€ 0.00</div>
             </div>
 
-            <div class="card" style="border-left-color: var(--cyan);">
-                <div class="orbitron" style="font-size: 9px; color: #444; margin-bottom: 10px;">ACTIVE_STAKE_FILTER</div>
-                <select id="buyin-filter" onchange="applyFilters()" style="font-size: 20px; width: 100%; margin-top: 5px;">
+            <div class="card cyan">
+                <div class="orbitron" style="font-size: 9px; color: #444; margin-bottom: 10px;">AVG_VPIP</div>
+                <div style="font-size: 24px; font-weight: 900; color: var(--cyan);" id="avg-vpip">0.0%</div>
+            </div>
+
+            <div class="card orange">
+                <div class="orbitron" style="font-size: 9px; color: #444; margin-bottom: 10px;">AVG_PFR</div>
+                <div style="font-size: 24px; font-weight: 900; color: var(--orange);" id="avg-pfr">0.0%</div>
+            </div>
+
+            <div class="card" style="border-left-color: #666;">
+                <div class="orbitron" style="font-size: 9px; color: #444; margin-bottom: 10px;">STAKE_FILTER</div>
+                <select id="buyin-filter" onchange="applyFilters()" style="font-size: 18px; width: 100%;">
                     <option value="ALL">ALL_STAKES</option>
+                    <option value="5">€ 5.00</option>
                     <option value="10">€ 10.00</option>
                     <option value="20">€ 20.00</option>
-                    <option value="225">€ 225.00</option>
                 </select>
             </div>
 
-            <div class="card" id="drop-zone" style="border: 1px dashed var(--neon); background: transparent; cursor: pointer;">
-                <div class="orbitron" style="font-size: 9px; color: var(--neon);">FAST_SYNC_ZONE</div>
-                <div style="font-size: 10px; color: #666; margin-top: 5px;" id="upload-status">DRAG & DROP HH FILES</div>
-            </div>
-
-            <div id="import-log"></div>
+            <div id="import-log">Pronto per l'importazione...</div>
 
             <div class="graph-container">
                 <canvas id="performanceChart"></canvas>
+            </div>
+
+            <div class="card" style="grid-column: span 4;">
+                <div class="orbitron" style="font-size: 9px; color: #444; margin-bottom: 10px;">RECENT_SESSIONS</div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>DATA</th>
+                            <th>ROOM</th>
+                            <th>MANI</th>
+                            <th>PROFIT</th>
+                            <th>VPIP</th>
+                            <th>PFR</th>
+                            <th>3BET</th>
+                        </tr>
+                    </thead>
+                    <tbody id="session-list"></tbody>
+                </table>
             </div>
         </div>
     </div>
 
     <script>
-        const DB_URL = "https://script.google.com/macros/s/AKfycbwp-Y8FVTO6wJFbhZ-Pma-_9fU-4lu3zWSbXrlFd4qDZ9Qt8KB46zs8c1Hws64GEWx7BQ/exec";
+        // URL DEFINITIVA DA ISTRUZIONI
+        const DB_URL = "https://script.google.com/macros/s/AKfycbysHnxHlOQt6qwbLmqMx7PkvW7WYePu5k1gjfl_H7LMvMVWf5MuOklghvQRwJlmzYIjxQ/exec";
         let perfChart = null;
         let allData = [];
 
         function initDashboard() {
-            const user = JSON.parse(localStorage.getItem('ev_user'));
-            if (!user) { window.location.href = "index.html"; return; }
+            // Recupero dati utente (gestisce sia ev_user che poker_user per compatibilità)
+            const userStored = localStorage.getItem('ev_user') || localStorage.getItem('poker_user');
+            if (!userStored) { window.location.href = "index.html"; return; }
+            
+            const user = userStored.startsWith('{') ? JSON.parse(userStored) : { username: userStored };
             document.getElementById('user-display').innerText = user.username.toUpperCase();
             document.getElementById('token-display').innerText = user.token || 100;
+            
             initChart();
             loadDataFromDB();
         }
@@ -104,24 +140,41 @@
                 type: 'line',
                 data: {
                     labels: [0],
-                    datasets: [
-                        { label: 'Net', data: [0], borderColor: '#33c95c', borderWidth: 2, pointRadius: 0 },
-                        { label: 'EV', data: [0], borderColor: '#00e5ff', borderDash: [5, 5], borderWidth: 2, pointRadius: 0 },
-                        { label: 'Red', data: [0], borderColor: '#ff4444', borderWidth: 1, pointRadius: 0 },
-                        { label: 'Blue', data: [0], borderColor: '#4444ff', borderWidth: 1, pointRadius: 0 }
-                    ]
+                    datasets: [{
+                        label: 'Net Profit',
+                        data: [0],
+                        borderColor: '#33c95c',
+                        borderWidth: 3,
+                        pointRadius: 2,
+                        backgroundColor: 'rgba(51, 201, 92, 0.1)',
+                        fill: true,
+                        tension: 0.3
+                    }]
                 },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { grid: { color: '#1a1a1a' } }, x: { display: false } } }
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    plugins: { legend: { display: false } }, 
+                    scales: { 
+                        y: { grid: { color: '#1a1a1a' }, ticks: { color: '#666' } }, 
+                        x: { grid: { display: false }, ticks: { display: false } } 
+                    } 
+                }
             });
         }
 
         async function loadDataFromDB() {
-            const user = JSON.parse(localStorage.getItem('ev_user')).username;
+            const userStored = localStorage.getItem('ev_user') || localStorage.getItem('poker_user');
+            const username = userStored.startsWith('{') ? JSON.parse(userStored).username : userStored;
+            
             try {
-                const r = await fetch(`${DB_URL}?action=getSessions&username=${encodeURIComponent(user)}`);
+                const r = await fetch(`${DB_URL}?action=getSessions&username=${encodeURIComponent(username)}`);
                 allData = await r.json();
                 applyFilters();
-            } catch (e) { console.error("DB Error"); }
+            } catch (e) { 
+                console.error("DB Error", e);
+                document.getElementById('import-log').innerText = "ERRORE DI CONNESSIONE AL DATABASE";
+            }
         }
 
         function applyFilters() {
@@ -131,43 +184,42 @@
         }
 
         function updateUI(sessions) {
-            let n = [0], e = [0], r = [0], b = [0], total = 0;
+            let n = [0], total = 0, totalVpip = 0, totalPfr = 0;
+            const tbody = document.getElementById('session-list');
+            tbody.innerHTML = '';
+
             sessions.forEach(s => {
                 let p = parseFloat(s.profit);
                 total += p;
                 n.push(total);
-                e.push(total * 0.98); // Mock EV
-                r.push(total * -0.3); // Mock Red
-                b.push(total * 1.3);  // Mock Blue
+                totalVpip += parseFloat(s.vpip || 0);
+                totalPfr += parseFloat(s.pfr || 0);
+
+                const row = `<tr>
+                    <td>${new Date(s.timestamp).toLocaleDateString()}</td>
+                    <td>${s.room}</td>
+                    <td>${s.hands}</td>
+                    <td style="color: ${p >= 0 ? 'var(--neon)' : '#ff4444'}">€ ${p.toFixed(2)}</td>
+                    <td style="color: var(--cyan)">${s.vpip}%</td>
+                    <td style="color: var(--orange)">${s.pfr}%</td>
+                    <td>${s.threebet}%</td>
+                </tr>`;
+                tbody.innerHTML += row;
             });
+
+            // Update Widgets
+            document.getElementById('total-profit').innerText = "€ " + total.toFixed(2);
+            if(sessions.length > 0) {
+                document.getElementById('avg-vpip').innerText = (totalVpip / sessions.length).toFixed(1) + "%";
+                document.getElementById('avg-pfr').innerText = (totalPfr / sessions.length).toFixed(1) + "%";
+            }
+
+            // Update Chart
             perfChart.data.labels = Array.from(Array(n.length).keys());
             perfChart.data.datasets[0].data = n;
-            perfChart.data.datasets[1].data = e;
-            perfChart.data.datasets[2].data = r;
-            perfChart.data.datasets[3].data = b;
             perfChart.update();
-            document.getElementById('total-profit').innerText = "€ " + total.toFixed(2);
         }
 
-        const dropZone = document.getElementById('drop-zone');
-        dropZone.ondrop = async (e) => {
-            e.preventDefault();
-            const files = Array.from(e.dataTransfer.files);
-            const log = document.getElementById('import-log');
-            log.innerHTML = "Inizio importazione...<br>";
-            
-            for (let file of files) {
-                const formData = new FormData();
-                formData.append('file', file);
-                try {
-                    const res = await fetch('http://127.0.0.1:5000/upload-hand', { method: 'POST', body: formData });
-                    const d = await res.json();
-                    log.innerHTML += `> OK: ${file.name}<br>`;
-                } catch (err) { log.innerHTML += `> ERR: ${file.name}<br>`; }
-            }
-            setTimeout(loadDataFromDB, 1500);
-        };
-        dropZone.ondragover = (e) => e.preventDefault();
         function navigate(p) { window.location.href = p; }
         function logout() { localStorage.clear(); window.location.href = "index.html"; }
     </script>
