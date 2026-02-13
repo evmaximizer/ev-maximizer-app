@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <title>EV Maximizer - Terminale Operativo</title>
-    <link rel="icon" type="image/png" href="logotop.png">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
@@ -11,100 +10,78 @@
         :root { --neon: #33c95c; --bg: #050505; --card-bg: #0f0f0f; --cyan: #00e5ff; }
         body { background: var(--bg); color: white; font-family: 'Share Tech Mono', monospace; margin: 0; display: flex; height: 100vh; overflow: hidden; }
         .sidebar { width: 300px; background: #000; border-right: 1px solid #1a1a1a; padding: 25px; display: flex; flex-direction: column; }
-        .nav-item { color: #666; margin-bottom: 15px; cursor: pointer; transition: 0.3s; font-family: 'Orbitron'; font-size: 11px; letter-spacing: 1px; }
-        .nav-item:hover, .nav-item.active { color: var(--neon); text-shadow: 0 0 10px var(--neon); }
-        .btn-logout { color: #ff4444 !important; margin-top: auto; border-top: 1px solid #1a1a1a; padding-top: 20px; }
-        .main-content { flex-grow: 1; padding: 40px; overflow-y: auto; background: radial-gradient(circle at top right, #0a0a0a, #050505); }
-        .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 40px; border-bottom: 1px solid #1a1a1a; padding-bottom: 20px; }
-        .pill { background: rgba(0,0,0,0.5); border: 1px solid #1a1a1a; padding: 10px 20px; border-radius: 4px; display: inline-flex; align-items: center; }
-        .orbitron { font-family: 'Orbitron', sans-serif; font-weight: 900; }
-        .dashboard-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 25px; }
-        .card { background: var(--card-bg); border: 1px solid #1a1a1a; padding: 25px; position: relative; overflow: hidden; }
-        .card::before { content: ""; position: absolute; top: 0; left: 0; width: 2px; height: 100%; background: var(--neon); }
-        .badge-owner { background: var(--neon); color: black; padding: 2px 5px; font-size: 8px; margin-left: 10px; border-radius: 2px; font-weight: 900; }
-        #upload-status { display: none; margin-top: 15px; font-size: 10px; color: var(--cyan); }
-        .graph-container { grid-column: span 3; height: 450px; background: #000; border: 1px solid #1a1a1a; padding: 20px; position: relative; }
+        .main-content { flex-grow: 1; padding: 40px; overflow-y: auto; }
+        .card { background: var(--card-bg); border: 1px solid #1a1a1a; padding: 25px; position: relative; }
+        
+        /* Nuovi elementi per lo stato di importazione */
+        #import-console { 
+            background: #000; border: 1px solid #1a1a1a; height: 100px; 
+            overflow-y: auto; font-size: 10px; color: var(--neon); padding: 10px; margin-top: 10px;
+            display: none;
+        }
+        .progress-bar-container { width: 100%; height: 5px; background: #1a1a1a; margin-top: 5px; display: none; }
+        #progress-fill { height: 100%; background: var(--neon); width: 0%; transition: 0.3s; }
+        
+        .btn-refresh { 
+            background: transparent; border: 1px solid var(--neon); color: var(--neon); 
+            padding: 5px 15px; cursor: pointer; font-family: 'Orbitron'; font-size: 10px;
+        }
+        .btn-refresh:hover { background: var(--neon); color: #000; }
+        .graph-container { grid-column: span 3; height: 400px; background: #000; margin-top: 20px; padding: 20px; }
     </style>
 </head>
 <body onload="initDashboard()">
 
     <div class="sidebar">
         <div style="margin-bottom: 50px;">
-            <img src="logotop.png" style="width: 40px; filter: drop-shadow(0 0 5px var(--neon));">
-            <div class="orbitron" style="font-size: 16px; margin-top: 10px; letter-spacing: 2px;">EV_MAXIMIZER</div>
-            <div style="font-size: 9px; color: var(--neon); opacity: 0.7;">V2.0_CORE_TERMINAL</div>
+            <div class="orbitron" style="font-size: 16px; color: var(--neon);">EV_MAXIMIZER</div>
         </div>
-        <nav id="sidebar-nav" style="flex-grow: 1; display: flex; flex-direction: column;">
-            <div class="orbitron" style="font-size: 9px; color: #444; margin-bottom: 20px;">SYSTEM_MENU</div>
-            <div class="nav-item active" onclick="navigate('dashboard.html')">> DASHBOARD</div>
-            <div class="nav-item" onclick="navigate('sessions.html')">> MY SESSIONS</div>
-            <div class="nav-item" onclick="navigate('evo.html')">> EVO COACH (AI)</div>
-            <div class="nav-item" onclick="navigate('settings.html')">> ACCOUNT SETTINGS</div>
-            <div class="nav-item btn-logout" onclick="logout()">> TERMINATE_SESSION (LOGOUT)</div>
+        <nav style="flex-grow: 1;">
+            <div class="nav-item active">> DASHBOARD</div>
+            <div class="nav-item" onclick="location.href='sessions.html'">> MY SESSIONS</div>
+            <div class="nav-item" onclick="location.href='evo.html'">> EVO COACH</div>
         </nav>
     </div>
 
     <div class="main-content">
-        <div class="header">
-            <div>
-                <div class="orbitron" style="font-size: 24px; letter-spacing: -1px;">OPERATIVE_DASHBOARD</div>
-                <div style="color: #444; font-size: 11px; margin-top: 5px;">STATUS: <span style="color: var(--neon);">ENCRYPTED_LINK_ACTIVE</span></div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+            <div class="orbitron" style="font-size: 24px;">SYSTEM_DASHBOARD</div>
+            <button class="btn-refresh" onclick="loadDataFromDB()">FORCE_DB_REFRESH</button>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;">
+            <div class="card">
+                <div style="font-size: 10px; color: #444;">DATABASE_SYNC_STATUS</div>
+                <div id="sync-status" style="color: var(--neon); margin-top: 10px;">CONNECTED</div>
             </div>
-            <div style="display: flex; gap: 15px;">
-                <div class="pill" style="cursor: pointer; border-color: var(--neon);" onclick="toggleBB()">
-                    <span style="font-size: 9px; color: #444; font-family: 'Orbitron';">VIEW_MODE:</span>
-                    <span id="bb-toggle-text" style="color: var(--neon); font-family: 'Orbitron'; margin-left: 10px;">CURRENCY (€)</span>
-                </div>
-                <div class="pill">
-                    <span style="font-size: 9px; color: #444; font-family: 'Orbitron';">OPERATOR:</span>
-                    <span id="user-display" style="color: #fff; font-family: 'Orbitron'; margin-left: 10px;">LOADING...</span>
-                    <span class="badge-owner">OWNER</span>
-                </div>
+
+            <div class="card" id="drop-zone" style="border: 2px dashed #333; cursor: pointer;">
+                <div style="font-size: 10px; color: var(--cyan);">IMPORT_ZONE (HH_FILES)</div>
+                <div style="font-size: 11px; color: #666; margin-top: 5px;">DRAG FILES HERE OR CLICK</div>
+                <div class="progress-bar-container" id="p-container"><div id="progress-fill"></div></div>
+            </div>
+
+            <div class="card">
+                <div style="font-size: 10px; color: #444;">TOTAL_PROFIT</div>
+                <div id="total-profit" style="font-size: 24px; color: #fff;">€ 0.00</div>
             </div>
         </div>
 
-        <div class="dashboard-grid">
-            <div class="card">
-                <div class="orbitron" style="font-size: 10px; color: #444; margin-bottom: 15px;">TOTAL_PROFIT</div>
-                <div style="font-size: 32px; font-weight: 900;" id="total-profit">€ 0.00</div>
-                <div style="font-size: 10px; color: var(--neon); margin-top: 10px;">+0.0% VS PREV_MONTH</div>
-            </div>
+        <div id="import-console"></div>
 
-            <div class="card" style="border-left: 2px solid var(--cyan);">
-                <div class="orbitron" style="font-size: 10px; color: #444; margin-bottom: 15px;">EVO_ANALYSIS_TOKENS</div>
-                <div style="font-size: 32px; font-weight: 900; color: var(--cyan);" id="token-display">100</div>
-                <div style="font-size: 10px; color: #444; margin-top: 10px;">CURRENT_PLAN: <span id="plan-display" style="color: white;">FULL_BETA</span></div>
-            </div>
-
-            <div class="card" id="drop-zone" style="border: 1px dashed rgba(51, 201, 92, 0.3); background: transparent;">
-                <div class="orbitron" style="font-size: 10px; color: var(--neon); margin-bottom: 10px;">FAST_SYNC_ZONE</div>
-                <div style="font-size: 11px; color: #666;">DRAG & DROP HAND_HISTORY FILES HERE</div>
-                <div id="upload-status">SYNCING_WITH_CORE...</div>
-            </div>
-
-            <div class="graph-container">
-                <div class="orbitron" style="font-size: 10px; color: #444; margin-bottom: 20px;">
-                    TOTAL_PERFORMANCE_OVERVIEW // <span style="color: var(--neon);">NET</span> | <span style="color: var(--cyan);">EV</span> | <span style="color: #ff4444;">RED</span> | <span style="color: #4444ff;">BLUE</span>
-                </div>
-                <div style="height: 350px;">
-                    <canvas id="performanceChart"></canvas>
-                </div>
-            </div>
+        <div class="graph-container">
+            <canvas id="performanceChart"></canvas>
         </div>
     </div>
 
     <script>
-        let perfChart = null;
+        // URL del tuo database (Google Apps Script)
+        const DB_URL = "https://script.google.com/macros/s/AKfycbwp-Y8FVTO6wJFbhZ-Pma-_9fU-4lu3zWSbXrlFd4qDZ9Qt8KB46zs8c1Hws64GEWx7BQ/exec";
+        let perfChart;
 
         function initDashboard() {
-            const storedData = localStorage.getItem('ev_user');
-            if (storedData) {
-                const userData = JSON.parse(storedData);
-                document.getElementById('user-display').innerText = (userData.username || 'USER').toUpperCase();
-                document.getElementById('plan-display').innerText = (userData.status || 'BETA_TESTER').toUpperCase();
-                document.getElementById('token-display').innerText = (userData.tokens !== undefined) ? userData.tokens : 100;
-            } else { window.location.href = "index.html"; }
             initChart();
+            loadDataFromDB(); // Carica subito i dati salvati
         }
 
         function initChart() {
@@ -112,59 +89,84 @@
             perfChart = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: [0],
+                    labels: [],
                     datasets: [
-                        { label: 'Net Profit', data: [0], borderColor: '#33c95c', tension: 0.1, borderWidth: 2, pointRadius: 0 },
-                        { label: 'All-In EV', data: [0], borderColor: '#00e5ff', tension: 0.1, borderDash: [5, 5], borderWidth: 2, pointRadius: 0 },
-                        { label: 'Non-Showdown', data: [0], borderColor: '#ff4444', tension: 0.1, borderWidth: 1, pointRadius: 0 },
-                        { label: 'Showdown', data: [0], borderColor: '#4444ff', tension: 0.1, borderWidth: 1, pointRadius: 0 }
+                        { label: 'Net', data: [], borderColor: '#33c95c', borderWidth: 2, pointRadius: 0 },
+                        { label: 'EV', data: [], borderColor: '#00e5ff', borderDash: [5,5], borderWidth: 2, pointRadius: 0 }
                     ]
                 },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: { grid: { color: '#1a1a1a' }, ticks: { color: '#444' } },
-                        x: { grid: { display: false }, ticks: { color: '#444' } }
-                    },
-                    plugins: { legend: { display: false } }
-                }
+                options: { responsive: true, maintainAspectRatio: false }
             });
         }
 
-        function updateDashboardGraph(net, ev, red, blue, profit) {
-            perfChart.data.labels = Array.from(Array(net.length).keys());
-            perfChart.data.datasets[0].data = net;
-            perfChart.data.datasets[1].data = ev;
-            perfChart.data.datasets[2].data = red;
-            perfChart.data.datasets[3].data = blue;
-            perfChart.update();
-            document.getElementById('total-profit').innerText = "€ " + profit;
+        async function loadDataFromDB() {
+            logConsole("Inizializzando recupero dati dal Database...");
+            try {
+                const response = await fetch(DB_URL + "?action=getSessions");
+                const data = await response.json();
+                updateUIWithDBData(data);
+                logConsole("Dati caricati correttamente.");
+            } catch (e) {
+                logConsole("ERRORE: Impossibile connettersi al database.");
+            }
         }
 
+        function logConsole(msg) {
+            const consoleBox = document.getElementById('import-console');
+            consoleBox.style.display = 'block';
+            consoleBox.innerHTML += `> ${new Date().toLocaleTimeString()}: ${msg}<br>`;
+            consoleBox.scrollTop = consoleBox.scrollHeight;
+        }
+
+        // Logica di importazione file
         const dropZone = document.getElementById('drop-zone');
-        const status = document.getElementById('upload-status');
-        dropZone.ondragover = (e) => { e.preventDefault(); dropZone.style.borderColor = "var(--cyan)"; };
-        dropZone.ondrop = (e) => {
+        dropZone.ondrop = async (e) => {
             e.preventDefault();
-            status.style.display = 'block';
-            setTimeout(() => {
-                status.innerText = "SYNC_COMPLETE - 100%";
-                status.style.color = "var(--neon)";
-                // Simulazione dati dopo caricamento file
-                const net = [0, 50, 40, 120, 150, 142.50];
-                const ev = [0, 40, 60, 90, 110, 115];
-                const red = [0, -20, -45, -60, -85, -95];
-                const blue = [0, 70, 85, 180, 235, 237.50];
-                updateDashboardGraph(net, ev, red, blue, "142.50");
-            }, 1500);
+            const files = Array.from(e.dataTransfer.files);
+            logConsole(`Rilevati ${files.length} file. Inizio importazione...`);
+            
+            document.getElementById('p-container').style.display = 'block';
+            let processed = 0;
+
+            for (let file of files) {
+                const formData = new FormData();
+                formData.append('file', file);
+                
+                try {
+                    // Invia a Python per il parsing, poi Python invierà al Database
+                    await fetch('http://127.0.0.1:5000/upload-hand', { method: 'POST', body: formData });
+                    processed++;
+                    let percent = (processed / files.length) * 100;
+                    document.getElementById('progress-fill').style.width = percent + "%";
+                } catch (err) {
+                    logConsole(`Errore su file: ${file.name}`);
+                }
+            }
+            
+            logConsole("Importazione completata. Aggiornamento Dashboard...");
+            setTimeout(loadDataFromDB, 2000); // Ricarica i dati dal DB dopo l'importazione
         };
 
-        function navigate(page) { window.location.href = page; }
-        function logout() { localStorage.removeItem('ev_user'); window.location.href = "index.html"; }
-        function toggleBB() {
-            isBB = !isBB;
-            document.getElementById('bb-toggle-text').innerText = isBB ? "BIG_BLINDS (BB)" : "CURRENCY (€)";
+        dropZone.ondragover = (e) => e.preventDefault();
+
+        function updateUIWithDBData(sessions) {
+            if (!sessions || sessions.length === 0) return;
+            
+            let netData = [0], evData = [0], labels = [0], total = 0;
+            
+            sessions.forEach((s, index) => {
+                total += parseFloat(s.profit);
+                netData.push(total);
+                evData.push(total * 0.95); // Qui poi useremo l'EV reale dal DB
+                labels.push(index + 1);
+            });
+
+            perfChart.data.labels = labels;
+            perfChart.data.datasets[0].data = netData;
+            perfChart.data.datasets[1].data = evData;
+            perfChart.update();
+            
+            document.getElementById('total-profit').innerText = `€ ${total.toFixed(2)}`;
         }
     </script>
 </body>
