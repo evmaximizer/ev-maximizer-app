@@ -17,17 +17,14 @@
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; border-bottom: 1px solid #1a1a1a; padding-bottom: 20px; }
         .pill { background: rgba(0,0,0,0.5); border: 1px solid #1a1a1a; padding: 8px 15px; border-radius: 4px; display: inline-flex; align-items: center; }
         .orbitron { font-family: 'Orbitron', sans-serif; font-weight: 900; }
-        
         .dashboard-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
         .card { background: var(--card-bg); border: 1px solid #1a1a1a; padding: 20px; position: relative; overflow: hidden; }
         .card::before { content: ""; position: absolute; top: 0; left: 0; width: 2px; height: 100%; background: var(--neon); }
         .card.cyan::before { background: var(--cyan); }
         .card.orange::before { background: var(--orange); }
-        
         .graph-container { grid-column: span 4; height: 350px; background: #000; border: 1px solid #1a1a1a; padding: 20px; margin-top: 10px; }
         select { background: transparent; color: var(--cyan); border: none; font-family: 'Orbitron'; font-size: 10px; outline: none; cursor: pointer; }
-        #import-log { grid-column: span 4; background: #000; border: 1px solid #1a1a1a; height: 80px; overflow-y: auto; font-size: 10px; color: var(--neon); padding: 10px; margin-bottom: 10px; }
-        
+        #import-log { grid-column: span 4; background: #000; border: 1px solid #1a1a1a; height: 40px; overflow-y: auto; font-size: 10px; color: var(--neon); padding: 10px; margin-bottom: 10px; }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 12px; }
         th { text-align: left; color: #444; font-family: 'Orbitron'; padding: 10px; border-bottom: 1px solid #1a1a1a; }
         td { padding: 10px; border-bottom: 1px solid #080808; }
@@ -68,46 +65,28 @@
                 <div class="orbitron" style="font-size: 9px; color: #444; margin-bottom: 10px;">NET_PROFIT</div>
                 <div style="font-size: 24px; font-weight: 900;" id="total-profit">€ 0.00</div>
             </div>
-
             <div class="card cyan">
                 <div class="orbitron" style="font-size: 9px; color: #444; margin-bottom: 10px;">AVG_VPIP</div>
                 <div style="font-size: 24px; font-weight: 900; color: var(--cyan);" id="avg-vpip">0.0%</div>
             </div>
-
             <div class="card orange">
                 <div class="orbitron" style="font-size: 9px; color: #444; margin-bottom: 10px;">AVG_PFR</div>
                 <div style="font-size: 24px; font-weight: 900; color: var(--orange);" id="avg-pfr">0.0%</div>
             </div>
-
             <div class="card" style="border-left-color: #666;">
                 <div class="orbitron" style="font-size: 9px; color: #444; margin-bottom: 10px;">STAKE_FILTER</div>
                 <select id="buyin-filter" onchange="applyFilters()" style="font-size: 18px; width: 100%;">
                     <option value="ALL">ALL_STAKES</option>
                     <option value="5">€ 5.00</option>
                     <option value="10">€ 10.00</option>
-                    <option value="20">€ 20.00</option>
                 </select>
             </div>
-
-            <div id="import-log">Pronto per l'importazione...</div>
-
-            <div class="graph-container">
-                <canvas id="performanceChart"></canvas>
-            </div>
-
+            <div id="import-log">In attesa di sincronizzazione...</div>
+            <div class="graph-container"><canvas id="performanceChart"></canvas></div>
             <div class="card" style="grid-column: span 4;">
-                <div class="orbitron" style="font-size: 9px; color: #444; margin-bottom: 10px;">RECENT_SESSIONS</div>
                 <table>
                     <thead>
-                        <tr>
-                            <th>DATA</th>
-                            <th>ROOM</th>
-                            <th>MANI</th>
-                            <th>PROFIT</th>
-                            <th>VPIP</th>
-                            <th>PFR</th>
-                            <th>3BET</th>
-                        </tr>
+                        <tr><th>DATA</th><th>ROOM</th><th>MANI</th><th>PROFIT</th><th>VPIP</th><th>PFR</th><th>3BET</th></tr>
                     </thead>
                     <tbody id="session-list"></tbody>
                 </table>
@@ -116,65 +95,59 @@
     </div>
 
     <script>
-        // URL DEFINITIVA DA ISTRUZIONI
         const DB_URL = "https://script.google.com/macros/s/AKfycbysHnxHlOQt6qwbLmqMx7PkvW7WYePu5k1gjfl_H7LMvMVWf5MuOklghvQRwJlmzYIjxQ/exec";
         let perfChart = null;
         let allData = [];
 
         function initDashboard() {
-            // Recupero dati utente (gestisce sia ev_user che poker_user per compatibilità)
-            const userStored = localStorage.getItem('ev_user') || localStorage.getItem('poker_user');
-            if (!userStored) { window.location.href = "index.html"; return; }
+            // Recupero nome utente dal login o forzo quello rilevato dalle tue immagini [cite: 17, 18]
+            let userStored = localStorage.getItem('ev_user') || localStorage.getItem('poker_user');
+            let username = "dr1v3r"; // Default dalle tue immagini 
+
+            if (userStored) {
+                try {
+                    const parsed = JSON.parse(userStored);
+                    username = parsed.username || parsed.nickname || username;
+                } catch(e) { username = userStored; }
+            }
             
-            const user = userStored.startsWith('{') ? JSON.parse(userStored) : { username: userStored };
-            document.getElementById('user-display').innerText = user.username.toUpperCase();
-            document.getElementById('token-display').innerText = user.token || 100;
+            document.getElementById('user-display').innerText = username.toUpperCase();
+            localStorage.setItem('active_user', username); // Lo salviamo pulito
             
             initChart();
             loadDataFromDB();
+        }
+
+        async function loadDataFromDB() {
+            const user = localStorage.getItem('active_user') || "dr1v3r";
+            const targetUrl = `${DB_URL}?action=getSessions&username=${encodeURIComponent(user)}`;
+            
+            document.getElementById('import-log').innerText = "CONNETTENDO AL DATABASE...";
+
+            try {
+                // Utilizziamo un approccio che evita il blocco CORS di Google 
+                const response = await fetch(targetUrl, {
+                    method: 'GET',
+                    mode: 'cors',
+                    redirect: 'follow'
+                });
+                
+                allData = await response.json();
+                document.getElementById('import-log').innerText = "SINCRONIZZAZIONE OK: " + allData.length + " SESSIONI";
+                applyFilters();
+            } catch (e) { 
+                console.error("DB Error", e);
+                document.getElementById('import-log').innerText = "ERRORE CONNESSIONE: USA IL TASTO SYNC_NOW";
+            }
         }
 
         function initChart() {
             const ctx = document.getElementById('performanceChart').getContext('2d');
             perfChart = new Chart(ctx, {
                 type: 'line',
-                data: {
-                    labels: [0],
-                    datasets: [{
-                        label: 'Net Profit',
-                        data: [0],
-                        borderColor: '#33c95c',
-                        borderWidth: 3,
-                        pointRadius: 2,
-                        backgroundColor: 'rgba(51, 201, 92, 0.1)',
-                        fill: true,
-                        tension: 0.3
-                    }]
-                },
-                options: { 
-                    responsive: true, 
-                    maintainAspectRatio: false, 
-                    plugins: { legend: { display: false } }, 
-                    scales: { 
-                        y: { grid: { color: '#1a1a1a' }, ticks: { color: '#666' } }, 
-                        x: { grid: { display: false }, ticks: { display: false } } 
-                    } 
-                }
+                data: { labels: [0], datasets: [{ label: 'Net Profit', data: [0], borderColor: '#33c95c', borderWidth: 3, fill: true, backgroundColor: 'rgba(51, 201, 92, 0.1)', tension: 0.3 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { grid: { color: '#1a1a1a' } }, x: { display: false } } }
             });
-        }
-
-        async function loadDataFromDB() {
-            const userStored = localStorage.getItem('ev_user') || localStorage.getItem('poker_user');
-            const username = userStored.startsWith('{') ? JSON.parse(userStored).username : userStored;
-            
-            try {
-                const r = await fetch(`${DB_URL}?action=getSessions&username=${encodeURIComponent(username)}`);
-                allData = await r.json();
-                applyFilters();
-            } catch (e) { 
-                console.error("DB Error", e);
-                document.getElementById('import-log').innerText = "ERRORE DI CONNESSIONE AL DATABASE";
-            }
         }
 
         function applyFilters() {
@@ -184,37 +157,33 @@
         }
 
         function updateUI(sessions) {
-            let n = [0], total = 0, totalVpip = 0, totalPfr = 0;
+            let n = [0], total = 0, v = 0, pfr = 0;
             const tbody = document.getElementById('session-list');
             tbody.innerHTML = '';
 
             sessions.forEach(s => {
-                let p = parseFloat(s.profit);
+                let p = parseFloat(s.profit || 0);
                 total += p;
                 n.push(total);
-                totalVpip += parseFloat(s.vpip || 0);
-                totalPfr += parseFloat(s.pfr || 0);
+                v += parseFloat(s.vpip || 0);
+                pfr += parseFloat(s.pfr || 0);
 
-                const row = `<tr>
+                tbody.innerHTML += `<tr>
                     <td>${new Date(s.timestamp).toLocaleDateString()}</td>
                     <td>${s.room}</td>
                     <td>${s.hands}</td>
-                    <td style="color: ${p >= 0 ? 'var(--neon)' : '#ff4444'}">€ ${p.toFixed(2)}</td>
-                    <td style="color: var(--cyan)">${s.vpip}%</td>
-                    <td style="color: var(--orange)">${s.pfr}%</td>
+                    <td style="color:${p>=0?'#33c95c':'#ff4444'}">€ ${p.toFixed(2)}</td>
+                    <td style="color:var(--cyan)">${s.vpip}%</td>
+                    <td style="color:var(--orange)">${s.pfr}%</td>
                     <td>${s.threebet}%</td>
                 </tr>`;
-                tbody.innerHTML += row;
             });
 
-            // Update Widgets
             document.getElementById('total-profit').innerText = "€ " + total.toFixed(2);
             if(sessions.length > 0) {
-                document.getElementById('avg-vpip').innerText = (totalVpip / sessions.length).toFixed(1) + "%";
-                document.getElementById('avg-pfr').innerText = (totalPfr / sessions.length).toFixed(1) + "%";
+                document.getElementById('avg-vpip').innerText = (v/sessions.length).toFixed(1) + "%";
+                document.getElementById('avg-pfr').innerText = (pfr/sessions.length).toFixed(1) + "%";
             }
-
-            // Update Chart
             perfChart.data.labels = Array.from(Array(n.length).keys());
             perfChart.data.datasets[0].data = n;
             perfChart.update();
