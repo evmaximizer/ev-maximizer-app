@@ -2,7 +2,7 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <title>EV Maximizer - Terminale Operativo</title>
+    <title>EV Maximizer - Dashboard</title>
     <link rel="icon" type="image/png" href="logotop.png">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
@@ -22,12 +22,10 @@
         .card::before { content: ""; position: absolute; top: 0; left: 0; width: 2px; height: 100%; background: var(--neon); }
         .card.cyan::before { background: var(--cyan); }
         .card.orange::before { background: var(--orange); }
-        .graph-container { grid-column: span 4; height: 350px; background: #000; border: 1px solid #1a1a1a; padding: 20px; margin-top: 10px; }
+        .graph-container { grid-column: span 4; height: 350px; background: #000; border: 1px solid #1a1a1a; padding: 20px; }
+        .small-graph { grid-column: span 2; height: 250px; background: #000; border: 1px solid #1a1a1a; padding: 20px; margin-top: 10px; }
         select { background: transparent; color: var(--cyan); border: none; font-family: 'Orbitron'; font-size: 10px; outline: none; cursor: pointer; }
-        #import-log { grid-column: span 4; background: #000; border: 1px solid #1a1a1a; height: 40px; overflow-y: auto; font-size: 10px; color: var(--neon); padding: 10px; margin-bottom: 10px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 12px; }
-        th { text-align: left; color: #444; font-family: 'Orbitron'; padding: 10px; border-bottom: 1px solid #1a1a1a; }
-        td { padding: 10px; border-bottom: 1px solid #080808; }
+        #import-log { grid-column: span 4; background: #000; border: 1px solid #1a1a1a; font-size: 10px; color: var(--neon); padding: 10px; margin-bottom: 10px; }
     </style>
 </head>
 <body onload="initDashboard()">
@@ -37,7 +35,7 @@
             <img src="logotop.png" style="width: 40px; filter: drop-shadow(0 0 5px var(--neon));">
             <div class="orbitron" style="font-size: 16px; margin-top: 10px; letter-spacing: 2px;">EV_MAXIMIZER</div>
         </div>
-        <nav id="sidebar-nav" style="flex-grow: 1;">
+        <nav style="flex-grow: 1;">
             <div class="nav-item active" onclick="navigate('dashboard.html')">> DASHBOARD</div>
             <div class="nav-item" onclick="navigate('sessions.html')">> MY SESSIONS</div>
             <div class="nav-item" onclick="navigate('evo.html')">> EVO COACH (AI)</div>
@@ -49,28 +47,22 @@
         <div class="header">
             <div class="orbitron" style="font-size: 20px;">SYSTEM_DASHBOARD</div>
             <div style="display: flex; gap: 10px; align-items: center;">
-                <div class="pill" style="border-color: var(--cyan);">
-                    <span style="font-size: 9px; color: #666; margin-right: 10px;">TOKENS:</span>
-                    <span id="token-display" style="color: var(--cyan); font-weight: bold;">100</span>
-                </div>
                 <button class="pill" style="color: var(--neon); cursor: pointer; background: none; border: 1px solid var(--neon);" onclick="loadDataFromDB()">SYNC_NOW</button>
-                <div class="pill">
-                    <span id="user-display" style="font-size: 11px;">DR1V3R</span>
-                </div>
+                <div class="pill"><span id="user-display" style="font-size: 11px;">DR1V3R</span></div>
             </div>
         </div>
 
         <div class="dashboard-grid">
             <div class="card">
-                <div class="orbitron" style="font-size: 9px; color: #444; margin-bottom: 10px;">NET_PROFIT</div>
+                <div class="orbitron" style="font-size: 9px; color: #444; margin-bottom: 10px;">TOTAL_NET_PROFIT</div>
                 <div style="font-size: 24px; font-weight: 900;" id="total-profit">€ 0.00</div>
             </div>
             <div class="card cyan">
-                <div class="orbitron" style="font-size: 9px; color: #444; margin-bottom: 10px;">AVG_VPIP</div>
+                <div class="orbitron" style="font-size: 9px; color: #444; margin-bottom: 10px;">AVERAGE_VPIP</div>
                 <div style="font-size: 24px; font-weight: 900; color: var(--cyan);" id="avg-vpip">0.0%</div>
             </div>
             <div class="card orange">
-                <div class="orbitron" style="font-size: 9px; color: #444; margin-bottom: 10px;">AVG_PFR</div>
+                <div class="orbitron" style="font-size: 9px; color: #444; margin-bottom: 10px;">AVERAGE_PFR</div>
                 <div style="font-size: 24px; font-weight: 900; color: var(--orange);" id="avg-pfr">0.0%</div>
             </div>
             <div class="card" style="border-left-color: #666;">
@@ -79,61 +71,73 @@
                     <option value="ALL">ALL_STAKES</option>
                     <option value="5">€ 5.00</option>
                     <option value="10">€ 10.00</option>
-                    <option value="20">€ 20.00</option>
                 </select>
             </div>
-            <div id="import-log">In attesa di connessione...</div>
-            <div class="graph-container"><canvas id="performanceChart"></canvas></div>
-            <div class="card" style="grid-column: span 4;">
-                <table>
-                    <thead>
-                        <tr><th>DATA</th><th>ROOM</th><th>MANI</th><th>PROFIT</th><th>VPIP</th><th>PFR</th><th>3BET</th></tr>
-                    </thead>
-                    <tbody id="session-list"></tbody>
-                </table>
+
+            <div id="import-log">Database pronto.</div>
+
+            <div class="graph-container">
+                <div class="orbitron" style="font-size: 10px; color: var(--neon); margin-bottom: 10px;">NET_PROFIT_GRAPH</div>
+                <canvas id="performanceChart"></canvas>
+            </div>
+
+            <div class="small-graph">
+                <div class="orbitron" style="font-size: 10px; color: var(--cyan); margin-bottom: 10px;">VOLUME_TREND (HANDS)</div>
+                <canvas id="volumeChart"></canvas>
+            </div>
+            <div class="small-graph">
+                <div class="orbitron" style="font-size: 10px; color: var(--orange); margin-bottom: 10px;">PROFIT_DISTRIBUTION</div>
+                <canvas id="stakePieChart"></canvas>
             </div>
         </div>
     </div>
 
     <script>
-        // TUO NUOVO URL AGGIORNATO
         const DB_URL = "https://script.google.com/macros/s/AKfycbxDT81UDInmuccMGw-T44N8r_apnBTOQxTGlj6rhAU8AbAVuD3T94Q6ECezyiFPYOUZwg/exec";
-        let perfChart = null;
+        let perfChart, volumeChart, stakePieChart;
         let allData = [];
 
         function initDashboard() {
-            initChart();
+            initCharts();
             loadDataFromDB();
-            // Refresh automatico ogni 60 secondi
             setInterval(loadDataFromDB, 60000);
         }
 
         async function loadDataFromDB() {
-            const user = "dr1v3r"; // Forzato come da tua richiesta
-            const targetUrl = `${DB_URL}?action=getSessions&username=${encodeURIComponent(user)}`;
-            
+            const user = "dr1v3r";
+            const url = `${DB_URL}?action=getSessions&username=${encodeURIComponent(user)}`;
             document.getElementById('import-log').innerText = "SINCRONIZZAZIONE IN CORSO...";
 
             try {
-                // Fetch con gestione redirect per Google Apps Script
-                const response = await fetch(targetUrl);
-                if (!response.ok) throw new Error("Network response was not ok");
-                
-                allData = await response.json();
-                document.getElementById('import-log').innerText = "DATABASE CONNESSO - " + allData.length + " SESSIONI TROVATE";
+                const r = await fetch(url);
+                allData = await r.json();
+                document.getElementById('import-log').innerText = "SYNC OK: " + allData.length + " SESSIONI";
                 applyFilters();
             } catch (e) { 
-                console.error("DB Error", e);
-                document.getElementById('import-log').innerText = "ERRORE CONNESSIONE AL DATABASE";
+                document.getElementById('import-log').innerText = "ERRORE CONNESSIONE";
             }
         }
 
-        function initChart() {
-            const ctx = document.getElementById('performanceChart').getContext('2d');
-            perfChart = new Chart(ctx, {
+        function initCharts() {
+            // Grafico Lineare
+            perfChart = new Chart(document.getElementById('performanceChart').getContext('2d'), {
                 type: 'line',
-                data: { labels: [0], datasets: [{ label: 'Net Profit', data: [0], borderColor: '#33c95c', borderWidth: 3, fill: true, backgroundColor: 'rgba(51, 201, 92, 0.1)', tension: 0.3 }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { grid: { color: '#1a1a1a' } }, x: { display: false } } }
+                data: { labels: [], datasets: [{ label: 'Profit', data: [], borderColor: '#33c95c', fill: true, backgroundColor: 'rgba(51,201,92,0.1)', tension: 0.3 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+            });
+
+            // Grafico Volume (Barre)
+            volumeChart = new Chart(document.getElementById('volumeChart').getContext('2d'), {
+                type: 'bar',
+                data: { labels: [], datasets: [{ label: 'Hands', data: [], backgroundColor: 'rgba(0, 229, 255, 0.4)', borderColor: '#00e5ff', borderWidth: 1 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+            });
+
+            // Grafico Stake (Pie)
+            stakePieChart = new Chart(document.getElementById('stakePieChart').getContext('2d'), {
+                type: 'doughnut',
+                data: { labels: ['NL5', 'NL10'], datasets: [{ data: [0, 0], backgroundColor: ['#00e5ff', '#ffaa00'], borderWidth: 0 }] },
+                options: { responsive: true, maintainAspectRatio: false }
             });
         }
 
@@ -144,37 +148,37 @@
         }
 
         function updateUI(sessions) {
-            let n = [0], total = 0, v = 0, pfr = 0;
-            const tbody = document.getElementById('session-list');
-            tbody.innerHTML = '';
+            let total = 0, totalVpip = 0, totalPfr = 0, profitArray = [0], volumeArray = [], stakeData = { "5": 0, "10": 0 };
 
-            sessions.forEach(s => {
+            sessions.forEach((s, i) => {
                 let p = parseFloat(s.profit || 0);
                 total += p;
-                n.push(total);
-                v += parseFloat(s.vpip || 0);
-                pfr += parseFloat(s.pfr || 0);
-
-                tbody.innerHTML += `<tr>
-                    <td>${new Date(s.timestamp).toLocaleDateString()}</td>
-                    <td>${s.room || 'iPoker'}</td>
-                    <td>${s.hands || 0}</td>
-                    <td style="color:${p>=0?'#33c95c':'#ff4444'}">€ ${p.toFixed(2)}</td>
-                    <td style="color:var(--cyan)">${s.vpip || 0}%</td>
-                    <td style="color:var(--orange)">${s.pfr || 0}%</td>
-                    <td>${s.threebet || 0}%</td>
-                </tr>`;
+                profitArray.push(total);
+                volumeArray.push(s.hands || 0);
+                totalVpip += parseFloat(s.vpip || 0);
+                totalPfr += parseFloat(s.pfr || 0);
+                if(s.buyin == 5) stakeData["5"] += p;
+                if(s.buyin == 10) stakeData["10"] += p;
             });
 
+            // Widget
             document.getElementById('total-profit').innerText = "€ " + total.toFixed(2);
             if(sessions.length > 0) {
-                document.getElementById('avg-vpip').innerText = (v/sessions.length).toFixed(1) + "%";
-                document.getElementById('avg-pfr').innerText = (pfr/sessions.length).toFixed(1) + "%";
+                document.getElementById('avg-vpip').innerText = (totalVpip / sessions.length).toFixed(1) + "%";
+                document.getElementById('avg-pfr').innerText = (totalPfr / sessions.length).toFixed(1) + "%";
             }
-            
-            perfChart.data.labels = Array.from(Array(n.length).keys());
-            perfChart.data.datasets[0].data = n;
+
+            // Update Charts
+            perfChart.data.labels = Array.from(Array(profitArray.length).keys());
+            perfChart.data.datasets[0].data = profitArray;
             perfChart.update();
+
+            volumeChart.data.labels = sessions.map((_, i) => i + 1);
+            volumeChart.data.datasets[0].data = volumeArray;
+            volumeChart.update();
+
+            stakePieChart.data.datasets[0].data = [Math.abs(stakeData["5"]), Math.abs(stakeData["10"])];
+            stakePieChart.update();
         }
 
         function navigate(p) { window.location.href = p; }

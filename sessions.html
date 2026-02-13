@@ -3,163 +3,171 @@
 <head>
     <meta charset="UTF-8">
     <title>EV Maximizer - My Sessions</title>
+    <link rel="icon" type="image/png" href="logotop.png">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
     <style>
-        :root { --neon: #33c95c; --bg: #050505; --card-bg: #0f0f0f; --cyan: #00e5ff; }
-        body { background: var(--bg); color: white; font-family: 'Share Tech Mono', monospace; margin: 0; display: flex; height: 100vh; }
+        :root { --neon: #33c95c; --bg: #050505; --card-bg: #0f0f0f; --cyan: #00e5ff; --orange: #ffaa00; --red: #ff4444; --blue: #4444ff; --yellow: #ffeb3b; }
+        body { background: var(--bg); color: white; font-family: 'Share Tech Mono', monospace; margin: 0; display: flex; height: 100vh; overflow: hidden; }
         .sidebar { width: 300px; background: #000; border-right: 1px solid #1a1a1a; padding: 25px; display: flex; flex-direction: column; }
-        .main-content { flex-grow: 1; padding: 40px; overflow-y: auto; }
-        .nav-item { color: #666; margin-bottom: 15px; cursor: pointer; font-family: 'Orbitron'; font-size: 11px; }
-        .nav-item.active { color: var(--neon); }
+        .main-content { flex-grow: 1; padding: 40px; overflow-y: auto; background: radial-gradient(circle at top right, #0a0a0a, #050505); }
+        .nav-item { color: #666; margin-bottom: 15px; cursor: pointer; transition: 0.3s; font-family: 'Orbitron'; font-size: 11px; letter-spacing: 1px; }
+        .nav-item:hover, .nav-item.active { color: var(--neon); text-shadow: 0 0 10px var(--neon); }
         
-        /* Badge & Pill */
-        .badge-owner { background: var(--neon); color: black; padding: 2px 8px; border-radius: 3px; font-weight: bold; font-size: 10px; margin-left: 10px; }
-        .badge-rank { border: 1px solid #cd7f32; color: #cd7f32; padding: 2px 8px; border-radius: 3px; font-size: 10px; margin-left: 10px; font-weight: 900; }
-
-        /* Room Tabs Style */
-        .room-tabs { display: flex; gap: 10px; margin-bottom: 20px; }
-        .tab-btn { background: transparent; border: 1px solid #1a1a1a; color: #444; padding: 8px 20px; cursor: pointer; font-family: 'Orbitron'; font-size: 9px; transition: 0.3s; }
-        .tab-btn.active { border-color: var(--cyan); color: var(--cyan); box-shadow: 0 0 10px rgba(0, 229, 255, 0.2); }
-
-        /* Table & Inputs */
-        .input-terminal { background: #000; border: 1px solid #1a1a1a; color: var(--neon); font-family: 'Share Tech Mono'; padding: 8px; font-size: 12px; }
-        table { width: 100%; border-collapse: collapse; background: var(--card-bg); margin-bottom: 30px; }
-        th { text-align: left; padding: 15px; border-bottom: 2px solid #1a1a1a; color: #444; font-family: 'Orbitron'; font-size: 10px; }
-        td { padding: 15px; border-bottom: 1px solid #111; font-size: 13px; }
-
-        .btn-evo { background: transparent; border: 1px solid var(--cyan); color: var(--cyan); padding: 5px 12px; cursor: pointer; font-family: 'Orbitron'; font-size: 9px; }
+        .header-area { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 1px solid #1a1a1a; padding-bottom: 20px; }
+        .graph-card { background: var(--card-bg); border: 1px solid #1a1a1a; padding: 25px; margin-bottom: 30px; height: 450px; position: relative; }
         
-        /* Grafico Fisso */
-        #main-graph-container { padding: 25px; background: var(--card-bg); border: 1px solid #1a1a1a; height: 400px; position: relative; }
+        table { width: 100%; border-collapse: collapse; background: #000; font-size: 12px; }
+        th { text-align: left; padding: 12px; border-bottom: 2px solid #1a1a1a; color: #444; font-family: 'Orbitron'; font-size: 10px; }
+        td { padding: 12px; border-bottom: 1px solid #080808; }
+        
+        .btn-evo { background: transparent; border: 1px solid var(--cyan); color: var(--cyan); padding: 5px 10px; cursor: pointer; font-family: 'Orbitron'; font-size: 8px; transition: 0.3s; }
+        .btn-evo:hover { background: var(--cyan); color: black; }
+        
+        .legend-custom { display: flex; gap: 20px; margin-top: 10px; font-size: 10px; font-family: 'Orbitron'; }
+        .leg-item { display: flex; align-items: center; gap: 5px; }
+        .dot { width: 10px; height: 10px; border-radius: 50%; }
     </style>
 </head>
 <body onload="initSessions()">
     <div class="sidebar">
         <div style="margin-bottom: 50px;">
-            <img src="logotop.png" style="width: 40px;">
-            <div class="orbitron" style="font-size: 16px; margin-top: 10px;">EV_MAXIMIZER</div>
+            <img src="logotop.png" style="width: 40px; filter: drop-shadow(0 0 5px var(--neon));">
+            <div class="orbitron" style="font-size: 16px; margin-top: 10px; letter-spacing: 2px;">EV_MAXIMIZER</div>
         </div>
         <nav>
             <div class="nav-item" onclick="location.href='dashboard.html'">> DASHBOARD</div>
             <div class="nav-item active">> MY SESSIONS</div>
             <div class="nav-item" onclick="location.href='evo.html'">> EVO COACH (AI)</div>
-            <div class="nav-item" onclick="location.href='settings.html'">> ACCOUNT SETTINGS</div>
+            <div class="nav-item btn-logout" onclick="localStorage.clear(); location.href='index.html'" style="color:#ff4444; margin-top:50px;">> LOGOUT</div>
         </nav>
     </div>
 
     <div class="main-content">
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px;">
+        <div class="header-area">
             <div>
-                <div class="orbitron" style="font-size: 24px;">SESSION_HISTORY_LOG</div>
-                <div style="margin-top: 15px; display: flex; gap: 10px;">
-                    <input type="date" id="date-from" class="input-terminal">
-                    <input type="date" id="date-to" class="input-terminal">
-                </div>
+                <div class="orbitron" style="font-size: 24px;">MY_SESSIONS_LOG</div>
+                <div style="color: var(--neon); font-size: 10px; margin-top: 5px;">ANALYTICS_TERMINAL_V3.6</div>
             </div>
-            <div style="display: flex; align-items: center;">
-                <span id="rank-badge" class="badge-rank">BRONZE_BETA</span>
-                <div class="pill" style="margin-left: 10px; background: rgba(0,0,0,0.5); border: 1px solid #1a1a1a; padding: 5px 15px; border-radius: 4px;">
-                    <span id="user-display" style="font-family: 'Orbitron'; font-size: 12px;">USER</span>
-                    <span class="badge-owner">OWNER</span>
-                </div>
+            <div class="pill" style="border: 1px solid #1a1a1a; padding: 10px 20px; background: rgba(0,0,0,0.5);">
+                <span id="user-display" style="font-family: 'Orbitron'; font-size: 12px; color: var(--cyan);">DR1V3R</span>
             </div>
         </div>
 
-        <div class="room-tabs">
-            <button class="tab-btn active" onclick="filterByRoom('ALL', this)">ALL_NETWORKS</button>
-            <button class="tab-btn" onclick="filterByRoom('PS', this)">POKERSTARS</button>
-            <button class="tab-btn" onclick="filterByRoom('IPOKER', this)">IPOKER</button>
+        <div class="graph-card">
+            <div class="orbitron" style="font-size: 10px; color: #444; margin-bottom: 15px;">ADVANCED_PERFORMANCE_CHART (4-LINES)</div>
+            <div style="height: 350px;">
+                <canvas id="fourLineChart"></canvas>
+            </div>
+            <div class="legend-custom">
+                <div class="leg-item"><div class="dot" style="background:var(--neon)"></div> NET PROFIT</div>
+                <div class="leg-item"><div class="dot" style="background:var(--yellow)"></div> ALL-IN EV</div>
+                <div class="leg-item"><div class="dot" style="background:var(--blue)"></div> SHOWDOWN</div>
+                <div class="leg-item"><div class="dot" style="background:var(--red)"></div> RED LINE (NON-SD)</div>
+            </div>
         </div>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>TIMESTAMP</th>
-                    <th>PLATFORM</th>
-                    <th>HANDS</th>
-                    <th>NET_PROFIT</th>
-                    <th>EV_EXPECTED</th>
-                    <th>ANALYSIS</th>
-                </tr>
-            </thead>
-            <tbody id="sessions-body">
-                </tbody>
-        </table>
-
-        <div id="main-graph-container">
-            <div class="orbitron" style="font-size: 10px; color: var(--neon); margin-bottom: 20px;">
-                PERFORMANCE_GRAPH // <span id="current-room-label">ALL_NETWORKS</span>
-            </div>
-            <div style="height: 320px;">
-                <canvas id="mainChart"></canvas>
-            </div>
+        <div class="card" style="background: var(--card-bg); border: 1px solid #1a1a1a; padding: 20px;">
+            <div class="orbitron" style="font-size: 10px; color: #444; margin-bottom: 20px;">SESSION_DETAILS_TABLE</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>DATE</th>
+                        <th>ROOM</th>
+                        <th>HANDS</th>
+                        <th>PROFIT</th>
+                        <th>VPIP/PFR</th>
+                        <th>3BET</th>
+                        <th>WTSD%</th>
+                        <th>ACTION</th>
+                    </tr>
+                </thead>
+                <tbody id="sessions-table-body">
+                    </tbody>
+            </table>
         </div>
     </div>
 
     <script>
-        let mainChart = null;
+        const DB_URL = "https://script.google.com/macros/s/AKfycbxDT81UDInmuccMGw-T44N8r_apnBTOQxTGlj6rhAU8AbAVuD3T94Q6ECezyiFPYOUZwg/exec";
+        let fourLineChart = null;
 
-        function initSessions() {
-            const userData = JSON.parse(localStorage.getItem('ev_user'));
-            if(userData) {
-                document.getElementById('user-display').innerText = userData.username.toUpperCase();
-                document.getElementById('rank-badge').innerText = (userData.status || 'BRONZE_BETA').toUpperCase();
-            }
-            updateUI('ALL');
+        async function initSessions() {
+            await loadSessionsData();
         }
 
-        function filterByRoom(room, btn) {
-            // Update buttons style
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            document.getElementById('current-room-label').innerText = room === 'ALL' ? 'ALL_NETWORKS' : room;
-            updateUI(room);
-        }
-
-        function updateUI(room) {
-            const tbody = document.getElementById('sessions-body');
-            // Qui simuli il cambio dati in base alla room
-            if(room === 'PS') {
-                tbody.innerHTML = `<tr><td>2026-02-13 14:30</td><td>POKERSTARS</td><td>452</td><td style="color:var(--neon)">+€142.50</td><td>+€115.00</td><td><button class="btn-evo">EVO_REVIEW</button></td></tr>`;
-                renderGraph([0, 10, 40, 80, 142]); // Dati solo PS
-            } else if(room === 'IPOKER') {
-                tbody.innerHTML = `<tr><td>2026-02-12 21:15</td><td>IPOKER</td><td>128</td><td style="color:#ff4444">-€34.20</td><td>-€12.00</td><td><button class="btn-evo">EVO_REVIEW</button></td></tr>`;
-                renderGraph([0, -10, -20, -34]); // Dati solo iPoker
-            } else {
-                tbody.innerHTML = `
-                    <tr><td>2026-02-13 14:30</td><td>POKERSTARS</td><td>452</td><td style="color:var(--neon)">+€142.50</td><td>+€115.00</td><td><button class="btn-evo">EVO_REVIEW</button></td></tr>
-                    <tr><td>2026-02-12 21:15</td><td>IPOKER</td><td>128</td><td style="color:#ff4444">-€34.20</td><td>-€12.00</td><td><button class="btn-evo">EVO_REVIEW</button></td></tr>`;
-                renderGraph([0, 30, 20, 100, 108]); // Dati combinati
+        async function loadSessionsData() {
+            const user = "dr1v3r";
+            try {
+                const r = await fetch(`${DB_URL}?action=getSessions&username=${encodeURIComponent(user)}`);
+                const data = await r.json();
+                updateUI(data);
+            } catch (e) {
+                console.error("Errore caricamento sessioni:", e);
             }
         }
 
-        function renderGraph(dataPoints) {
-            const ctx = document.getElementById('mainChart').getContext('2d');
-            if(mainChart) mainChart.destroy();
-            
-            mainChart = new Chart(ctx, {
+        function updateUI(data) {
+            const tbody = document.getElementById('sessions-table-body');
+            tbody.innerHTML = '';
+
+            // Array per il grafico
+            let net = [0], ev = [0], sd = [0], nsd = [0];
+            let cumNet = 0, cumEv = 0, cumSd = 0, cumNsd = 0;
+
+            data.forEach(s => {
+                // Calcoli cumulativi per le 4 linee
+                cumNet += parseFloat(s.profit || 0);
+                // NOTA: Se le colonne EV, SD e NSD non sono ancora nel DB, useranno valori simulati basati sul profit
+                cumEv += parseFloat(s.ev || s.profit * 0.9); 
+                cumSd += parseFloat(s.sd_profit || s.profit * 0.6);
+                cumNsd += parseFloat(s.nsd_profit || s.profit * 0.4);
+
+                net.push(cumNet);
+                ev.push(cumEv);
+                sd.push(cumSd);
+                nsd.push(cumNsd);
+
+                // Popolamento Tabella
+                const row = `<tr>
+                    <td>${new Date(s.timestamp).toLocaleDateString()}</td>
+                    <td>${s.room || 'iPoker'}</td>
+                    <td>${s.hands}</td>
+                    <td style="color:${s.profit >= 0 ? 'var(--neon)' : 'var(--red)'}">€ ${parseFloat(s.profit).toFixed(2)}</td>
+                    <td><span style="color:var(--cyan)">${s.vpip}%</span> / <span style="color:var(--orange)">${s.pfr}%</span></td>
+                    <td>${s.threebet}%</td>
+                    <td>${s.wtsd || '0'}%</td>
+                    <td><button class="btn-evo" onclick="window.location.href='evo.html'">ANALYZE_EVO</button></td>
+                </tr>`;
+                tbody.innerHTML += row;
+            });
+
+            renderFourLineChart(net, ev, sd, nsd);
+        }
+
+        function renderFourLineChart(net, ev, sd, nsd) {
+            const ctx = document.getElementById('fourLineChart').getContext('2d');
+            if(fourLineChart) fourLineChart.destroy();
+
+            fourLineChart = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: dataPoints.map((_, i) => i),
-                    datasets: [{
-                        label: 'Net Profit',
-                        data: dataPoints,
-                        borderColor: '#33c95c',
-                        backgroundColor: 'rgba(51, 201, 92, 0.1)',
-                        fill: true,
-                        tension: 0.3
-                    }]
+                    labels: Array.from(Array(net.length).keys()),
+                    datasets: [
+                        { label: 'Net Profit', data: net, borderColor: '#33c95c', borderWidth: 2, pointRadius: 0, fill: false, tension: 0.1 },
+                        { label: 'All-In EV', data: ev, borderColor: '#ffeb3b', borderWidth: 2, pointRadius: 0, fill: false, borderDash: [5, 5], tension: 0.1 },
+                        { label: 'Showdown', data: sd, borderColor: '#4444ff', borderWidth: 1, pointRadius: 0, fill: false, tension: 0.1 },
+                        { label: 'Non-Showdown', data: nsd, borderColor: '#ff4444', borderWidth: 1, pointRadius: 0, fill: false, tension: 0.1 }
+                    ]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
                     scales: {
-                        y: { grid: { color: '#1a1a1a' }, ticks: { color: '#444' } },
-                        x: { grid: { display: false }, ticks: { color: '#444' } }
-                    },
-                    plugins: { legend: { display: false } }
+                        y: { grid: { color: '#1a1a1a' }, ticks: { color: '#666' } },
+                        x: { display: false }
+                    }
                 }
             });
         }
