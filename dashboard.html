@@ -6,7 +6,6 @@
     <link rel="icon" type="image/png" href="logotop.png">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
     <style>
         :root { --neon: #33c95c; --bg: #050505; --card-bg: #0f0f0f; --cyan: #00e5ff; }
         body { background: var(--bg); color: white; font-family: 'Share Tech Mono', monospace; margin: 0; display: flex; height: 100vh; overflow: hidden; }
@@ -15,21 +14,15 @@
         .nav-item:hover, .nav-item.active { color: var(--neon); text-shadow: 0 0 10px var(--neon); }
         .btn-logout { color: #ff4444 !important; margin-top: auto; border-top: 1px solid #1a1a1a; padding-top: 20px; }
         .main-content { flex-grow: 1; padding: 40px; overflow-y: auto; background: radial-gradient(circle at top right, #0a0a0a, #050505); }
-        .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 40px; border-bottom: 1px solid #1a1a1a; padding-bottom: 20px; }
-        .pill { background: rgba(0,0,0,0.5); border: 1px solid #1a1a1a; padding: 10px 20px; border-radius: 4px; display: inline-flex; align-items: center; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; border-bottom: 1px solid #1a1a1a; padding-bottom: 20px; }
+        .pill { background: rgba(0,0,0,0.5); border: 1px solid #1a1a1a; padding: 8px 15px; border-radius: 4px; display: inline-flex; align-items: center; }
         .orbitron { font-family: 'Orbitron', sans-serif; font-weight: 900; }
-        .dashboard-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 25px; }
-        .card { background: var(--card-bg); border: 1px solid #1a1a1a; padding: 25px; position: relative; overflow: hidden; }
+        .dashboard-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+        .card { background: var(--card-bg); border: 1px solid #1a1a1a; padding: 20px; position: relative; overflow: hidden; }
         .card::before { content: ""; position: absolute; top: 0; left: 0; width: 2px; height: 100%; background: var(--neon); }
-        .badge-owner { background: var(--neon); color: black; padding: 2px 5px; font-size: 8px; margin-left: 10px; border-radius: 2px; font-weight: 900; }
-        
-        /* Select Styling */
-        select { background: transparent; color: var(--cyan); border: none; font-family: 'Orbitron'; font-size: 10px; outline: none; cursor: pointer; margin-left: 10px; }
-        option { background: #000; color: #fff; }
-
-        #import-log { grid-column: span 3; background: #000; border: 1px solid #1a1a1a; height: 80px; overflow-y: auto; font-size: 10px; color: var(--neon); padding: 10px; margin-top: -10px; display: none; }
-        .graph-container { grid-column: span 3; height: 450px; background: #000; border: 1px solid #1a1a1a; padding: 20px; position: relative; }
-        .btn-refresh { background: transparent; border: 1px solid var(--neon); color: var(--neon); cursor: pointer; font-family: 'Orbitron'; font-size: 9px; padding: 5px 10px; margin-left: 10px; }
+        .graph-container { grid-column: span 3; height: 400px; background: #000; border: 1px solid #1a1a1a; padding: 20px; margin-top: 10px; }
+        select { background: transparent; color: var(--cyan); border: none; font-family: 'Orbitron'; font-size: 10px; outline: none; cursor: pointer; }
+        #import-log { grid-column: span 3; background: #000; border: 1px solid #1a1a1a; height: 100px; overflow-y: auto; font-size: 10px; color: var(--neon); padding: 10px; margin-bottom: 10px; }
     </style>
 </head>
 <body onload="initDashboard()">
@@ -38,67 +31,55 @@
         <div style="margin-bottom: 50px;">
             <img src="logotop.png" style="width: 40px; filter: drop-shadow(0 0 5px var(--neon));">
             <div class="orbitron" style="font-size: 16px; margin-top: 10px; letter-spacing: 2px;">EV_MAXIMIZER</div>
-            <div style="font-size: 9px; color: var(--neon); opacity: 0.7;">V2.0_CORE_TERMINAL</div>
         </div>
-        <nav id="sidebar-nav" style="flex-grow: 1; display: flex; flex-direction: column;">
-            <div class="orbitron" style="font-size: 9px; color: #444; margin-bottom: 20px;">SYSTEM_MENU</div>
+        <nav id="sidebar-nav" style="flex-grow: 1;">
             <div class="nav-item active" onclick="navigate('dashboard.html')">> DASHBOARD</div>
             <div class="nav-item" onclick="navigate('sessions.html')">> MY SESSIONS</div>
             <div class="nav-item" onclick="navigate('evo.html')">> EVO COACH (AI)</div>
-            <div class="nav-item" onclick="navigate('settings.html')">> ACCOUNT SETTINGS</div>
-            <div class="nav-item btn-logout" onclick="logout()">> TERMINATE_SESSION (LOGOUT)</div>
+            <div class="nav-item btn-logout" onclick="logout()">> LOGOUT</div>
         </nav>
     </div>
 
     <div class="main-content">
         <div class="header">
-            <div>
-                <div class="orbitron" style="font-size: 24px; letter-spacing: -1px;">OPERATIVE_DASHBOARD</div>
-                <div style="color: #444; font-size: 11px; margin-top: 5px;">STATUS: <span id="db-status" style="color: var(--neon);">CONNECTING...</span></div>
-            </div>
-            <div style="display: flex; gap: 15px;">
-                <button class="btn-refresh" onclick="loadDataFromDB()">REFRESH_DB</button>
+            <div class="orbitron" style="font-size: 20px;">SYSTEM_DASHBOARD</div>
+            <div style="display: flex; gap: 10px; align-items: center;">
                 <div class="pill" style="border-color: var(--cyan);">
-                    <span style="font-size: 9px; color: #444; font-family: 'Orbitron';">STAKE:</span>
-                    <select id="buyin-filter" onchange="applyFilters()">
-                        <option value="ALL">ALL_STAKES</option>
-                        <option value="10">€10 (9+1)</option>
-                        <option value="20">€20 (18+2)</option>
-                        <option value="225">€225 (200+25)</option>
-                    </select>
+                    <span style="font-size: 9px; color: #444; margin-right: 10px;">EVO_TOKENS:</span>
+                    <span id="token-display" style="color: var(--cyan); font-weight: bold;">100</span>
                 </div>
+                <button class="pill" style="color: var(--neon); cursor: pointer;" onclick="loadDataFromDB()">REFRESH_DB</button>
                 <div class="pill">
-                    <span id="user-display" style="color: #fff; font-family: 'Orbitron';">USER</span>
-                    <span class="badge-owner">OWNER</span>
+                    <span id="user-display" style="font-size: 11px;">USER</span>
                 </div>
             </div>
         </div>
 
         <div class="dashboard-grid">
             <div class="card">
-                <div class="orbitron" style="font-size: 10px; color: #444; margin-bottom: 15px;">FILTERED_PROFIT</div>
-                <div style="font-size: 32px; font-weight: 900; color: #fff;" id="total-profit">€ 0.00</div>
+                <div class="orbitron" style="font-size: 9px; color: #444; margin-bottom: 10px;">SESSION_PROFIT</div>
+                <div style="font-size: 28px; font-weight: 900;" id="total-profit">€ 0.00</div>
             </div>
 
-            <div class="card" style="border-left: 2px solid var(--cyan);">
-                <div class="orbitron" style="font-size: 10px; color: #444; margin-bottom: 15px;">EVO_TOKENS</div>
-                <div style="font-size: 32px; font-weight: 900; color: var(--cyan);" id="token-display">100</div>
+            <div class="card" style="border-left-color: var(--cyan);">
+                <div class="orbitron" style="font-size: 9px; color: #444; margin-bottom: 10px;">ACTIVE_STAKE_FILTER</div>
+                <select id="buyin-filter" onchange="applyFilters()" style="font-size: 20px; width: 100%; margin-top: 5px;">
+                    <option value="ALL">ALL_STAKES</option>
+                    <option value="10">€ 10.00</option>
+                    <option value="20">€ 20.00</option>
+                    <option value="225">€ 225.00</option>
+                </select>
             </div>
 
-            <div class="card" id="drop-zone" style="border: 1px dashed rgba(51, 201, 92, 0.3); background: transparent; cursor: pointer;">
-                <div class="orbitron" style="font-size: 10px; color: var(--neon); margin-bottom: 10px;">FAST_SYNC_ZONE</div>
-                <div style="font-size: 11px; color: #666;" id="upload-status">DRAG & DROP HH FILES</div>
+            <div class="card" id="drop-zone" style="border: 1px dashed var(--neon); background: transparent; cursor: pointer;">
+                <div class="orbitron" style="font-size: 9px; color: var(--neon);">FAST_SYNC_ZONE</div>
+                <div style="font-size: 10px; color: #666; margin-top: 5px;" id="upload-status">DRAG & DROP HH FILES</div>
             </div>
 
             <div id="import-log"></div>
 
             <div class="graph-container">
-                <div class="orbitron" style="font-size: 10px; color: #444; margin-bottom: 20px;">
-                    PERFORMANCE // <span style="color: var(--neon);">NET</span> | <span style="color: var(--cyan);">EV</span> | <span style="color: #ff4444;">RED</span> | <span style="color: #4444ff;">BLUE</span>
-                </div>
-                <div style="height: 350px;">
-                    <canvas id="performanceChart"></canvas>
-                </div>
+                <canvas id="performanceChart"></canvas>
             </div>
         </div>
     </div>
@@ -109,13 +90,10 @@
         let allData = [];
 
         function initDashboard() {
-            const storedData = localStorage.getItem('ev_user');
-            if (storedData) {
-                const userData = JSON.parse(storedData);
-                document.getElementById('user-display').innerText = (userData.username || 'USER').toUpperCase();
-                document.getElementById('token-display').innerText = userData.token || 100;
-            } else { window.location.href = "index.html"; }
-            
+            const user = JSON.parse(localStorage.getItem('ev_user'));
+            if (!user) { window.location.href = "index.html"; return; }
+            document.getElementById('user-display').innerText = user.username.toUpperCase();
+            document.getElementById('token-display').innerText = user.token || 100;
             initChart();
             loadDataFromDB();
         }
@@ -127,43 +105,40 @@
                 data: {
                     labels: [0],
                     datasets: [
-                        { label: 'Net', data: [0], borderColor: '#33c95c', borderWidth: 2, pointRadius: 0, tension: 0.1 },
-                        { label: 'EV', data: [0], borderColor: '#00e5ff', borderDash: [5, 5], borderWidth: 2, pointRadius: 0, tension: 0.1 },
+                        { label: 'Net', data: [0], borderColor: '#33c95c', borderWidth: 2, pointRadius: 0 },
+                        { label: 'EV', data: [0], borderColor: '#00e5ff', borderDash: [5, 5], borderWidth: 2, pointRadius: 0 },
                         { label: 'Red', data: [0], borderColor: '#ff4444', borderWidth: 1, pointRadius: 0 },
                         { label: 'Blue', data: [0], borderColor: '#4444ff', borderWidth: 1, pointRadius: 0 }
                     ]
                 },
-                options: { responsive: true, maintainAspectRatio: false, scales: { y: { grid: { color: '#1a1a1a' } }, x: { display: false } }, plugins: { legend: { display: false } } }
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { grid: { color: '#1a1a1a' } }, x: { display: false } } }
             });
         }
 
         async function loadDataFromDB() {
             const user = JSON.parse(localStorage.getItem('ev_user')).username;
-            document.getElementById('db-status').innerText = "SYNCING...";
             try {
                 const r = await fetch(`${DB_URL}?action=getSessions&username=${encodeURIComponent(user)}`);
                 allData = await r.json();
                 applyFilters();
-                document.getElementById('db-status').innerText = "ENCRYPTED_LINK_ACTIVE";
-                document.getElementById('db-status').style.color = "var(--neon)";
-            } catch (e) { document.getElementById('db-status').innerText = "OFFLINE"; }
+            } catch (e) { console.error("DB Error"); }
         }
 
         function applyFilters() {
             const stake = document.getElementById('buyin-filter').value;
-            const filtered = (stake === "ALL") ? allData : allData.filter(s => s.buyin == stake);
+            const filtered = (stake === "ALL") ? allData : allData.filter(s => parseFloat(s.buyin) === parseFloat(stake));
             updateUI(filtered);
         }
 
         function updateUI(sessions) {
             let n = [0], e = [0], r = [0], b = [0], total = 0;
-            sessions.forEach((s) => {
+            sessions.forEach(s => {
                 let p = parseFloat(s.profit);
                 total += p;
                 n.push(total);
-                e.push(total * 0.98); 
-                r.push(total * -0.35); 
-                b.push(total * 1.35);
+                e.push(total * 0.98); // Mock EV
+                r.push(total * -0.3); // Mock Red
+                b.push(total * 1.3);  // Mock Blue
             });
             perfChart.data.labels = Array.from(Array(n.length).keys());
             perfChart.data.datasets[0].data = n;
@@ -171,31 +146,30 @@
             perfChart.data.datasets[2].data = r;
             perfChart.data.datasets[3].data = b;
             perfChart.update();
-
-            const totalEl = document.getElementById('total-profit');
-            totalEl.innerText = `€ ${total.toFixed(2)}`;
-            totalEl.style.color = total >= 0 ? "var(--neon)" : "#ff4444";
+            document.getElementById('total-profit').innerText = "€ " + total.toFixed(2);
         }
 
         const dropZone = document.getElementById('drop-zone');
         dropZone.ondrop = async (e) => {
             e.preventDefault();
             const files = Array.from(e.dataTransfer.files);
-            document.getElementById('import-log').style.display = 'block';
+            const log = document.getElementById('import-log');
+            log.innerHTML = "Inizio importazione...<br>";
+            
             for (let file of files) {
                 const formData = new FormData();
                 formData.append('file', file);
                 try {
-                    await fetch('http://127.0.0.1:5000/upload-hand', { method: 'POST', body: formData });
-                    document.getElementById('import-log').innerHTML += `> SUCCESS: ${file.name}<br>`;
-                } catch (err) { }
+                    const res = await fetch('http://127.0.0.1:5000/upload-hand', { method: 'POST', body: formData });
+                    const d = await res.json();
+                    log.innerHTML += `> OK: ${file.name}<br>`;
+                } catch (err) { log.innerHTML += `> ERR: ${file.name}<br>`; }
             }
-            setTimeout(loadDataFromDB, 2000);
+            setTimeout(loadDataFromDB, 1500);
         };
-
         dropZone.ondragover = (e) => e.preventDefault();
-        function navigate(page) { window.location.href = page; }
-        function logout() { localStorage.removeItem('ev_user'); window.location.href = "index.html"; }
+        function navigate(p) { window.location.href = p; }
+        function logout() { localStorage.clear(); window.location.href = "index.html"; }
     </script>
 </body>
 </html>
