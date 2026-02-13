@@ -51,11 +51,11 @@
             <div style="display: flex; gap: 10px; align-items: center;">
                 <div class="pill" style="border-color: var(--cyan);">
                     <span style="font-size: 9px; color: #666; margin-right: 10px;">TOKENS:</span>
-                    <span id="token-display" style="color: var(--cyan); font-weight: bold;">0</span>
+                    <span id="token-display" style="color: var(--cyan); font-weight: bold;">100</span>
                 </div>
                 <button class="pill" style="color: var(--neon); cursor: pointer; background: none; border: 1px solid var(--neon);" onclick="loadDataFromDB()">SYNC_NOW</button>
                 <div class="pill">
-                    <span id="user-display" style="font-size: 11px;">USER</span>
+                    <span id="user-display" style="font-size: 11px;">DR1V3R</span>
                 </div>
             </div>
         </div>
@@ -79,9 +79,10 @@
                     <option value="ALL">ALL_STAKES</option>
                     <option value="5">€ 5.00</option>
                     <option value="10">€ 10.00</option>
+                    <option value="20">€ 20.00</option>
                 </select>
             </div>
-            <div id="import-log">In attesa di sincronizzazione...</div>
+            <div id="import-log">In attesa di connessione...</div>
             <div class="graph-container"><canvas id="performanceChart"></canvas></div>
             <div class="card" style="grid-column: span 4;">
                 <table>
@@ -95,49 +96,35 @@
     </div>
 
     <script>
-        const DB_URL = "https://script.google.com/macros/s/AKfycbysHnxHlOQt6qwbLmqMx7PkvW7WYePu5k1gjfl_H7LMvMVWf5MuOklghvQRwJlmzYIjxQ/exec";
+        // TUO NUOVO URL AGGIORNATO
+        const DB_URL = "https://script.google.com/macros/s/AKfycbxDT81UDInmuccMGw-T44N8r_apnBTOQxTGlj6rhAU8AbAVuD3T94Q6ECezyiFPYOUZwg/exec";
         let perfChart = null;
         let allData = [];
 
         function initDashboard() {
-            // Recupero nome utente dal login o forzo quello rilevato dalle tue immagini [cite: 17, 18]
-            let userStored = localStorage.getItem('ev_user') || localStorage.getItem('poker_user');
-            let username = "dr1v3r"; // Default dalle tue immagini 
-
-            if (userStored) {
-                try {
-                    const parsed = JSON.parse(userStored);
-                    username = parsed.username || parsed.nickname || username;
-                } catch(e) { username = userStored; }
-            }
-            
-            document.getElementById('user-display').innerText = username.toUpperCase();
-            localStorage.setItem('active_user', username); // Lo salviamo pulito
-            
             initChart();
             loadDataFromDB();
+            // Refresh automatico ogni 60 secondi
+            setInterval(loadDataFromDB, 60000);
         }
 
         async function loadDataFromDB() {
-            const user = localStorage.getItem('active_user') || "dr1v3r";
+            const user = "dr1v3r"; // Forzato come da tua richiesta
             const targetUrl = `${DB_URL}?action=getSessions&username=${encodeURIComponent(user)}`;
             
-            document.getElementById('import-log').innerText = "CONNETTENDO AL DATABASE...";
+            document.getElementById('import-log').innerText = "SINCRONIZZAZIONE IN CORSO...";
 
             try {
-                // Utilizziamo un approccio che evita il blocco CORS di Google 
-                const response = await fetch(targetUrl, {
-                    method: 'GET',
-                    mode: 'cors',
-                    redirect: 'follow'
-                });
+                // Fetch con gestione redirect per Google Apps Script
+                const response = await fetch(targetUrl);
+                if (!response.ok) throw new Error("Network response was not ok");
                 
                 allData = await response.json();
-                document.getElementById('import-log').innerText = "SINCRONIZZAZIONE OK: " + allData.length + " SESSIONI";
+                document.getElementById('import-log').innerText = "DATABASE CONNESSO - " + allData.length + " SESSIONI TROVATE";
                 applyFilters();
             } catch (e) { 
                 console.error("DB Error", e);
-                document.getElementById('import-log').innerText = "ERRORE CONNESSIONE: USA IL TASTO SYNC_NOW";
+                document.getElementById('import-log').innerText = "ERRORE CONNESSIONE AL DATABASE";
             }
         }
 
@@ -170,12 +157,12 @@
 
                 tbody.innerHTML += `<tr>
                     <td>${new Date(s.timestamp).toLocaleDateString()}</td>
-                    <td>${s.room}</td>
-                    <td>${s.hands}</td>
+                    <td>${s.room || 'iPoker'}</td>
+                    <td>${s.hands || 0}</td>
                     <td style="color:${p>=0?'#33c95c':'#ff4444'}">€ ${p.toFixed(2)}</td>
-                    <td style="color:var(--cyan)">${s.vpip}%</td>
-                    <td style="color:var(--orange)">${s.pfr}%</td>
-                    <td>${s.threebet}%</td>
+                    <td style="color:var(--cyan)">${s.vpip || 0}%</td>
+                    <td style="color:var(--orange)">${s.pfr || 0}%</td>
+                    <td>${s.threebet || 0}%</td>
                 </tr>`;
             });
 
@@ -184,6 +171,7 @@
                 document.getElementById('avg-vpip').innerText = (v/sessions.length).toFixed(1) + "%";
                 document.getElementById('avg-pfr').innerText = (pfr/sessions.length).toFixed(1) + "%";
             }
+            
             perfChart.data.labels = Array.from(Array(n.length).keys());
             perfChart.data.datasets[0].data = n;
             perfChart.update();

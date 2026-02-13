@@ -2,46 +2,94 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EV Maximizer - Login</title>
     <link rel="icon" type="image/png" href="logotop.png">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Inter:wght@400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <style>
-        body { display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        body { display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #050505; }
         .login-card { width: 320px; text-align: center; padding: 40px; }
-        input { width: 100%; padding: 12px; margin: 10px 0; background: #000; border: 1px solid #333; color: white; border-radius: 8px; box-sizing: border-box; outline: none; }
-        input:focus { border-color: var(--neon); }
+        input { 
+            width: 100%; 
+            padding: 12px; 
+            margin: 10px 0; 
+            background: #000; 
+            border: 1px solid #333; 
+            color: white; 
+            border-radius: 8px; 
+            box-sizing: border-box; 
+            outline: none; 
+            font-family: 'Inter', sans-serif;
+        }
+        input:focus { border-color: var(--neon); box-shadow: 0 0 10px rgba(51, 201, 92, 0.2); }
+        .loading { font-family: 'Orbitron'; color: var(--neon); font-size: 10px; margin-top: 15px; display: none; }
     </style>
 </head>
 <body>
     <div class="card login-card">
         <img src="logotop.png" alt="Logo" style="width: 120px; margin-bottom: 20px;">
-        <h1 class="orbitron" style="color: var(--neon); font-size: 20px; margin-bottom: 30px;">EV MAXIMIZER</h1>
-        <input type="text" id="user" placeholder="Username">
+        <h1 class="orbitron" style="color: var(--neon); font-size: 20px; margin-bottom: 30px; letter-spacing: 1px;">EV MAXIMIZER</h1>
+        
+        <input type="text" id="user" placeholder="Username" spellcheck="false">
         <input type="password" id="pass" placeholder="Password">
-        <button class="btn-neon" style="width: 100%; padding: 12px; margin-top: 10px;" onclick="handleLogin()">ENTER SYSTEM</button>
+        
+        <button class="btn-neon" style="width: 100%; padding: 12px; margin-top: 10px;" id="loginBtn" onclick="handleLogin()">ENTER SYSTEM</button>
+        
+        <div id="loader" class="loading">CONNECTING TO DATABASE...</div>
     </div>
 
     <script>
         async function handleLogin() {
-            const user = document.getElementById('user').value;
-            const pass = document.getElementById('pass').value;
-            const scriptURL = "https://script.google.com/macros/s/AKfycbwp-Y8FVTO6wJFbhZ-Pma-_9fU-4lu3zWSbXrlFd4qDZ9Qt8KB46zs8c1Hws64GEWx7BQ/exec"; 
+            const user = document.getElementById('user').value.trim();
+            const pass = document.getElementById('pass').value.trim();
+            const btn = document.getElementById('loginBtn');
+            const loader = document.getElementById('loader');
+
+            if (!user || !pass) {
+                alert("Inserisci username e password.");
+                return;
+            }
+
+            // URL definitivo fornito
+            const scriptURL = "https://script.google.com/macros/s/AKfycbxDT81UDInmuccMGw-T44N8r_apnBTOQxTGlj6rhAU8AbAVuD3T94Q6ECezyiFPYOUZwg/exec"; 
+
+            // Estetica durante il caricamento
+            btn.style.display = "none";
+            loader.style.display = "block";
 
             try {
-                const response = await fetch(scriptURL + "?action=processLogin&username=" + encodeURIComponent(user) + "&pass=" + encodeURIComponent(pass));
+                // Costruiamo la URL con i parametri per la funzione doGet di Apps Script
+                const finalURL = `${scriptURL}?action=processLogin&username=${encodeURIComponent(user)}&pass=${encodeURIComponent(pass)}`;
+                
+                const response = await fetch(finalURL);
                 const data = await response.json();
                 
-                if(data.status === "success") {
+                if (data.status === "success") {
+                    // Salviamo i dati nella sessione del browser
                     localStorage.setItem('ev_user', JSON.stringify(data));
+                    // Reindirizziamo alla dashboard
                     window.location.href = "dashboard.html";
                 } else {
-                    alert("Credenziali errate o utente non trovato.");
+                    alert("Credenziali errate. Riprova.");
+                    resetBtn();
                 }
             } catch (e) {
-                alert("Errore di connessione al database.");
+                console.error("Errore:", e);
+                alert("Errore di connessione al database. Verifica la connessione.");
+                resetBtn();
             }
         }
+
+        function resetBtn() {
+            document.getElementById('loginBtn').style.display = "block";
+            document.getElementById('loader').style.display = "none";
+        }
+
+        // Permette di premere "Invio" per loggarsi
+        document.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') handleLogin();
+        });
     </script>
 </body>
 </html>
