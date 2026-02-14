@@ -4,71 +4,126 @@
     <meta charset="UTF-8">
     <title>EV Maximizer - Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <style>
-        :root { --neon: #33c95c; --bg: #050505; }
-        body { background: var(--bg); color: white; font-family: 'Share Tech Mono'; margin: 0; display: flex; height: 100vh; overflow: hidden; }
-        .sidebar { width: 260px; background: #000; border-right: 1px solid #1a1a1a; padding: 25px; }
-        .main { flex: 1; padding: 25px; display: flex; flex-direction: column; }
+        :root { --neon: #33c95c; --bg: #050505; --card-bg: #0f0f0f; }
         
-        /* Bottoni Piattaforme */
-        .platform-switcher { display: flex; gap: 15px; margin-bottom: 25px; }
-        .platform-btn { 
-            background: #000; border: 1px solid #1a1a1a; color: #666; 
-            padding: 10px 20px; font-family: 'Orbitron'; font-size: 10px; cursor: pointer; transition: 0.3s;
+        body { 
+            background: var(--bg); 
+            color: white; 
+            font-family: 'Share Tech Mono', monospace; 
+            margin: 0; 
+            display: flex; 
+            height: 100vh; 
+            overflow: hidden; 
         }
-        .platform-btn:hover, .platform-btn.active { border-color: var(--neon); color: var(--neon); box-shadow: 0 0 10px rgba(51,201,92,0.2); }
+        
+        /* SIDEBAR UNIFORMATA - Identica a Sessions e Settings */
+        .sidebar { width: 260px; background: #000; border-right: 1px solid #1a1a1a; padding: 25px; display: flex; flex-direction: column; flex-shrink: 0; }
+        .logo-container { text-align: center; margin-bottom: 40px; }
+        .logo-img { width: 130px; filter: drop-shadow(0 0 10px rgba(51, 201, 92, 0.3)); }
+        
+        .nav-item { 
+            color: #666; 
+            text-decoration: none; 
+            display: block; 
+            margin-bottom: 20px; 
+            font-family: 'Orbitron'; 
+            font-size: 11px; 
+            transition: 0.3s; 
+            letter-spacing: 1px;
+        }
+        .nav-item:hover, .nav-item.active { color: var(--neon); }
 
+        /* MAIN CONTENT */
+        .main { flex: 1; padding: 25px; display: flex; flex-direction: column; overflow: hidden; background: radial-gradient(circle at 50% 50%, #0a0a0a 0%, #050505 100%); }
+
+        /* PLATFORM SWITCHER */
+        .platform-switcher { display: flex; gap: 15px; margin-bottom: 20px; align-items: center; }
+        .platform-btn { 
+            background: #000; border: 1px solid #1a1a1a; color: #444; 
+            padding: 8px 15px; font-family: 'Orbitron'; font-size: 9px; cursor: pointer; transition: 0.3s;
+        }
+        .platform-btn:hover, .platform-btn.active { border-color: var(--neon); color: var(--neon); box-shadow: 0 0 10px rgba(51,201,92,0.1); }
+
+        /* STATS GRID */
         .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px; }
-        .card { background: #0f0f0f; border: 1px solid #1a1a1a; padding: 15px; border-left: 2px solid var(--neon); }
-        .full-chart { background: #0f0f0f; border: 1px solid #1a1a1a; flex: 1; padding: 20px; margin-bottom: 20px; height: 400px; }
-        .bottom-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; height: 250px; }
+        .card { background: var(--card-bg); border: 1px solid #1a1a1a; padding: 15px; border-left: 2px solid var(--neon); }
+        .card-label { font-size: 9px; color: #444; margin-bottom: 5px; font-family: 'Orbitron'; }
+        .card-value { font-size: 18px; font-family: 'Orbitron'; color: #fff; }
+
+        /* CHARTS */
+        .full-chart { background: var(--card-bg); border: 1px solid #1a1a1a; flex: 1; padding: 20px; margin-bottom: 20px; position: relative; }
+        .bottom-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; height: 220px; }
+        .small-card { background: var(--card-bg); border: 1px solid #1a1a1a; padding: 15px; }
     </style>
 </head>
 <body>
+
     <div class="sidebar">
-    <img src="logotop.png" style="width: 130px; margin-bottom: 50px; display: block; margin-left: auto; margin-right: auto;">
-    
-    <a href="dashboard.html" class="nav-item" id="nav-dash">TERMINAL_DASHBOARD</a>
-    
-    <a href="sessions.html" class="nav-item" id="nav-sessions">MY_SESSIONS</a>
-    <a href="evo.html" class="nav-item" id="nav-evo">EVO_COACH_AI</a>
-    <a href="settings.html" class="nav-item" id="nav-settings">ACCOUNT_SETTINGS</a>
-</div>
+        <div class="logo-container">
+            <img src="logotop.png" alt="EV_MAXIMIZER" class="logo-img">
+        </div>
+        
+        <a href="dashboard.html" class="nav-item active">TERMINAL_DASHBOARD</a>
+        <a href="sessions.html" class="nav-item">MY_SESSIONS</a>
+        <a href="evo.html" class="nav-item">EVO_COACH_AI</a>
+        <a href="settings.html" class="nav-item">ACCOUNT_SETTINGS</a>
+    </div>
 
     <div class="main">
         <div class="platform-switcher">
-            <div style="color: #444; font-family: 'Orbitron'; font-size: 10px; align-self: center; margin-right: 10px;">SELECT_ACTIVE_ROOM:</div>
-            <button class="platform-btn active" onclick="switchRoom('Lottomatica')">LOTTOMATICA</button>
-            <button class="platform-btn" onclick="switchRoom('PokerStars')">POKERSTARS</button>
-            <button class="platform-btn" onclick="switchRoom('SNAI')">SNAI</button>
-            <button class="platform-btn" onclick="switchRoom('Altro')">ALTRO</button>
+            <span style="font-family: 'Orbitron'; font-size: 9px; color: #222;">ACTIVE_ROOM:</span>
+            <button class="platform-btn active" onclick="selectPlatform('LOTTOMATICA')">LOTTOMATICA</button>
+            <button class="platform-btn" onclick="selectPlatform('POKERSTARS')">POKERSTARS</button>
+            <button class="platform-btn" onclick="selectPlatform('SNAI')">SNAI</button>
+            <button class="platform-btn" onclick="selectPlatform('GOLDBET')">GOLDBET</button>
         </div>
 
         <div class="stats-grid">
-            <div class="card"><div>PROFIT</div><div id="profit" style="font-size: 20px; font-family: 'Orbitron';">€ 0.00</div></div>
-            <div class="card"><div>VPIP</div><div id="vpip" style="font-size: 20px; font-family: 'Orbitron';">0.0%</div></div>
-            <div class="card"><div>PFR</div><div id="pfr" style="font-size: 20px; font-family: 'Orbitron';">0.0%</div></div>
-            <div class="card"><div>HANDS</div><div id="hands" style="font-size: 20px; font-family: 'Orbitron';">0</div></div>
+            <div class="card">
+                <div class="card-label">TOTAL_NET_PROFIT</div>
+                <div class="card-value" id="profit">€ 0.00</div>
+            </div>
+            <div class="card">
+                <div class="card-label">VPIP_EFFICIENCY</div>
+                <div class="card-value" id="vpip">0.0%</div>
+            </div>
+            <div class="card">
+                <div class="card-label">PFR_AGGRESSION</div>
+                <div class="card-value" id="pfr">0.0%</div>
+            </div>
+            <div class="card">
+                <div class="card-label">HANDS_COUNT</div>
+                <div class="card-value" id="hands">0</div>
+            </div>
         </div>
 
-        <div class="full-chart"><canvas id="mainChart"></canvas></div>
+        <div class="full-chart">
+            <div style="font-family: 'Orbitron'; font-size: 10px; color: var(--neon); margin-bottom: 10px;">CUMULATIVE_PERFORMANCE</div>
+            <canvas id="mainChart"></canvas>
+        </div>
         
         <div class="bottom-grid">
-            <div class="card"><canvas id="volChart"></canvas></div>
-            <div class="card"><canvas id="pieChart"></canvas></div>
+            <div class="small-card">
+                <canvas id="volChart"></canvas>
+            </div>
+            <div class="small-card">
+                <canvas id="pieChart"></canvas>
+            </div>
         </div>
     </div>
 
     <script>
-        function switchRoom(room) {
-            // Rimuove classe active da tutti e la mette a quello cliccato
-            document.querySelectorAll('.platform-btn').forEach(b => b.classList.remove('active'));
+        function selectPlatform(room) {
+            document.querySelectorAll('.platform-btn').forEach(btn => btn.classList.remove('active'));
             event.target.classList.add('active');
             console.log("Switching to: " + room);
-            // Qui chiamerai l'API per filtrare i grafici solo per quella room
+            // Qui caricherai i dati filtrati per la room selezionata
         }
-        // ... Inizializzazione grafici (come prima) ...
+
+        // Inizializzazione Grafici e Fetch Dati (come negli aggiornamenti precedenti)
+        // ... (Codice Chart.js)
     </script>
 </body>
 </html>
