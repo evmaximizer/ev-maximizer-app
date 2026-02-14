@@ -2,78 +2,82 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <title>EV Maximizer - Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EV Maximizer - Dashboard Online</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     
     <style>
-        /* CSS INTEGRATO - COSI NON SERVE IL FILE style.css ESTERNO */
-        :root { --neon: #33c95c; --bg: #050505; --card-bg: #0f0f0f; --glow: 0 0 15px rgba(51, 201, 92, 0.2); }
-        
+        /* RESET E STRUTTURA */
+        * { box-sizing: border-box; }
         body { 
-            background: var(--bg); color: white; margin: 0; 
-            display: flex; height: 100vh; overflow: hidden; 
+            background: #050505; color: white; margin: 0; 
+            display: flex; height: 100vh; width: 100vw; overflow: hidden; 
             font-family: 'Share Tech Mono', monospace; 
         }
 
-        /* SIDEBAR */
+        /* SIDEBAR FISSA */
         .sidebar { width: 240px; background: #000; border-right: 1px solid #1a1a1a; padding: 25px; flex-shrink: 0; }
-        .logo-container { text-align: center; margin-bottom: 40px; }
         .nav-item { 
             color: #666; text-decoration: none; display: block; 
             margin-bottom: 20px; font-family: 'Orbitron'; font-size: 11px; 
-            transition: 0.3s; letter-spacing: 1px;
+            letter-spacing: 1px;
         }
-        .nav-item.active, .nav-item:hover { color: var(--neon); }
+        .nav-item.active { color: #33c95c; }
 
-        /* MAIN AREA */
-        .main { flex: 1; padding: 20px; display: flex; flex-direction: column; overflow-y: auto; }
+        /* MAIN AREA SCROLLABILE */
+        .main { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; }
         
-        .header-tools { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .buyin-select { 
-            background: #000; color: var(--neon); border: 1px solid var(--neon); 
-            padding: 5px 15px; font-family: 'Orbitron'; font-size: 10px; cursor: pointer;
-        }
+        /* HEADER */
+        .header-tools { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-shrink: 0; }
 
-        /* STATS CARDS */
-        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px; }
+        /* CARDS ORIZZONTALI */
+        .stats-grid { 
+            display: grid; 
+            grid-template-columns: repeat(4, 1fr); 
+            gap: 15px; 
+            margin-bottom: 20px; 
+            flex-shrink: 0;
+        }
         .card-stat { 
-            background: var(--card-bg); border: 1px solid #1a1a1a; 
-            border-left: 3px solid var(--neon); padding: 15px; 
+            background: #0f0f0f; border: 1px solid #1a1a1a; 
+            border-left: 3px solid #33c95c; padding: 15px; 
         }
-        .label { font-size: 9px; color: #555; font-family: 'Orbitron'; text-transform: uppercase; }
-        .value { font-size: 20px; margin-top: 5px; font-weight: bold; }
+        .value { font-size: 20px; font-weight: bold; font-family: 'Orbitron'; }
 
-        /* DASHBOARD GRID (EVITA CASCATA) */
+        /* GRIGLIA GRAFICI - BLOCCATA */
         .dashboard-layout { 
             display: grid; 
-            grid-template-columns: 1.8fr 1fr; /* Colonna grande e colonna piccola */
+            grid-template-columns: 1.8fr 1fr; 
             gap: 20px; 
-            flex: 1;
-            min-height: 0;
+            flex: 1; /* Prende tutto lo spazio rimasto */
+            min-height: 500px; 
         }
 
-        .chart-main { 
-            background: var(--card-bg); border: 1px solid #1a1a1a; 
-            padding: 20px; display: flex; flex-direction: column;
+        .chart-container { 
+            background: #0f0f0f; border: 1px solid #1a1a1a; 
+            padding: 15px; display: flex; flex-direction: column;
+            position: relative;
         }
 
-        .side-charts { display: flex; flex-direction: column; gap: 20px; }
-        
-        .chart-small { 
-            background: var(--card-bg); border: 1px solid #1a1a1a; 
-            padding: 15px; flex: 1; display: flex; flex-direction: column;
+        .side-charts { display: grid; grid-template-rows: 1fr 1fr; gap: 20px; }
+
+        /* FORZATURA ALTEZZA CANVAS */
+        .canvas-holder { 
+            position: relative; 
+            flex: 1; 
+            width: 100%; 
+            min-height: 250px; /* Impedisce il collasso a cascata */
         }
 
-        .canvas-container { flex: 1; position: relative; min-height: 200px; }
-        h4 { font-family: 'Orbitron'; font-size: 10px; color: var(--neon); margin: 0 0 10px 0; }
+        h4 { font-family: 'Orbitron'; font-size: 10px; color: #33c95c; margin: 0 0 10px 0; }
     </style>
 </head>
 <body>
 
     <div class="sidebar">
-        <div class="logo-container">
-            <img src="logotop.png" alt="LOGO" style="width: 120px;">
+        <div style="margin-bottom:40px; text-align:center;">
+            <img src="logotop.png" style="width:120px; opacity:0.8;">
         </div>
         <a href="dashboard.html" class="nav-item active">TERMINAL_DASHBOARD</a>
         <a href="sessions.html" class="nav-item">MY_SESSIONS</a>
@@ -82,40 +86,35 @@
 
     <div class="main">
         <div class="header-tools">
-            <h2 style="font-family:'Orbitron'; font-size:16px; margin:0; letter-spacing:2px;">DASHBOARD_V.2.0</h2>
-            <select class="buyin-select">
-                <option>ALL_BUYINS</option>
-                <option>€5.00</option>
-                <option>€10.00</option>
-                <option>€20.00</option>
-            </select>
+            <h2 style="font-family:'Orbitron'; font-size:14px; margin:0; color:#33c95c;">SYSTEM_LIVE_FEED</h2>
+            <div id="connection-status" style="font-size:10px; color:red;">OFFLINE_DB</div>
         </div>
 
         <div class="stats-grid">
-            <div class="card-stat"><div class="label">TOTAL_NET</div><div class="value" id="profit">€ 0.00</div></div>
-            <div class="card-stat"><div class="label">VPIP_AVG</div><div class="value" id="vpip">0.0%</div></div>
-            <div class="card-stat"><div class="label">TOTAL_HANDS</div><div class="value" id="hands">0</div></div>
-            <div class="card-stat"><div class="label">SESSIONS</div><div class="value" id="sessions">0</div></div>
+            <div class="card-stat"><div style="font-size:9px; color:#555;">PROFIT</div><div class="value" id="profit">€ 0.00</div></div>
+            <div class="card-stat"><div style="font-size:9px; color:#555;">VPIP</div><div class="value" id="vpip">0.0%</div></div>
+            <div class="card-stat"><div style="font-size:9px; color:#555;">HANDS</div><div class="value" id="hands">0</div></div>
+            <div class="card-stat"><div style="font-size:9px; color:#555;">GAMES</div><div class="value" id="sessions">0</div></div>
         </div>
 
         <div class="dashboard-layout">
-            <div class="chart-main">
-                <h4>CUMULATIVE_PROFIT_GROWTH</h4>
-                <div class="canvas-container">
+            <div class="chart-container">
+                <h4>CUMULATIVE_PROFIT_GRAPH</h4>
+                <div class="canvas-holder">
                     <canvas id="profitChart"></canvas>
                 </div>
             </div>
 
             <div class="side-charts">
-                <div class="chart-small">
-                    <h4>BUYIN_DISTRIBUTION</h4>
-                    <div class="canvas-container">
+                <div class="chart-container">
+                    <h4>BUYIN_DIST</h4>
+                    <div class="canvas-holder">
                         <canvas id="buyinChart"></canvas>
                     </div>
                 </div>
-                <div class="chart-small">
-                    <h4>HANDS_PER_SESSION</h4>
-                    <div class="canvas-container">
+                <div class="chart-container">
+                    <h4>VOLUME_ANALYSIS</h4>
+                    <div class="canvas-holder">
                         <canvas id="handsChart"></canvas>
                     </div>
                 </div>
@@ -126,58 +125,59 @@
     <script>
         let charts = {};
 
-        function initCharts() {
-            const opt = { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } };
+        function init() {
+            const cfg = { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } };
             
-            charts.profit = new Chart(document.getElementById('profitChart'), {
+            charts.p = new Chart(document.getElementById('profitChart'), {
                 type: 'line',
-                data: { labels: [], datasets: [{ borderColor: '#33c95c', backgroundColor: 'rgba(51,201,92,0.1)', data: [], fill: true, tension: 0.3 }] },
-                options: opt
+                data: { labels: [], datasets: [{ borderColor: '#33c95c', data: [], fill: true, backgroundColor: 'rgba(51,201,92,0.1)', tension: 0.3 }] },
+                options: cfg
             });
 
-            charts.buyin = new Chart(document.getElementById('buyinChart'), {
+            charts.b = new Chart(document.getElementById('buyinChart'), {
                 type: 'bar',
                 data: { labels: [], datasets: [{ backgroundColor: '#33c95c', data: [] }] },
-                options: opt
+                options: cfg
             });
 
-            charts.hands = new Chart(document.getElementById('handsChart'), {
+            charts.h = new Chart(document.getElementById('handsChart'), {
                 type: 'line',
                 data: { labels: [], datasets: [{ borderColor: '#4444ff', data: [], tension: 0.3 }] },
-                options: opt
+                options: cfg
             });
         }
 
-        async function updateDashboard() {
+        async function update() {
             try {
+                // NOTA: Se il sito è su GitHub, 'localhost' funziona solo se app.py è acceso sul TUO pc.
                 const res = await fetch('http://127.0.0.1:5000/get-stats');
-                const data = await res.json();
-                if(data.status !== "success") return;
+                const d = await res.json();
+                
+                document.getElementById('connection-status').innerText = "ONLINE_DB";
+                document.getElementById('connection-status').style.color = "#33c95c";
 
-                document.getElementById('profit').innerText = `€ ${data.total_profit.toFixed(2)}`;
-                document.getElementById('vpip').innerText = `${data.avg_vpip}%`;
-                document.getElementById('hands').innerText = data.total_hands;
-                document.getElementById('sessions').innerText = data.count_tornei;
+                document.getElementById('profit').innerText = `€ ${d.total_profit.toFixed(2)}`;
+                document.getElementById('vpip').innerText = `${d.avg_vpip}%`;
+                document.getElementById('hands').innerText = d.total_hands;
+                document.getElementById('sessions').innerText = d.count_tornei;
 
-                charts.profit.data.labels = data.labels;
-                charts.profit.data.datasets[0].data = data.net_chart;
-                charts.profit.update();
+                charts.p.data.labels = d.labels;
+                charts.p.data.datasets[0].data = d.net_chart;
+                charts.p.update();
 
-                charts.buyin.data.labels = data.buyin_labels;
-                charts.buyin.data.datasets[0].data = data.buyin_chart;
-                charts.buyin.update();
+                charts.b.data.labels = d.buyin_labels;
+                charts.b.data.datasets[0].data = d.buyin_chart;
+                charts.b.update();
 
-                charts.hands.data.labels = data.labels;
-                charts.hands.data.datasets[0].data = data.hands_chart;
-                charts.hands.update();
-            } catch(e) { console.log("In attesa del server..."); }
+                charts.h.data.labels = d.labels;
+                charts.h.data.datasets[0].data = d.hands_chart;
+                charts.h.update();
+            } catch(e) { 
+                document.getElementById('connection-status').innerText = "OFFLINE_DB - START APP.PY";
+            }
         }
 
-        window.onload = () => {
-            initCharts();
-            updateDashboard();
-            setInterval(updateDashboard, 15000);
-        };
+        window.onload = () => { init(); update(); setInterval(update, 10000); };
     </script>
 </body>
 </html>

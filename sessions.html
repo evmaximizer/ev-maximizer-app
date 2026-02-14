@@ -2,46 +2,74 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EV Maximizer - My Sessions</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    
     <style>
-        :root { --neon: #33c95c; --bg: #050505; --card-bg: #0f0f0f; --red: #ff4444; --blue: #4444ff; --ev: #ffff44; }
-        body { background: var(--bg); color: white; font-family: 'Share Tech Mono'; margin: 0; display: flex; height: 100vh; overflow: hidden; }
-        
+        /* RESET E STRUTTURA FISSA */
+        * { box-sizing: border-box; }
+        body { 
+            background: #050505; color: white; margin: 0; 
+            display: flex; height: 100vh; width: 100vw; overflow: hidden; 
+            font-family: 'Share Tech Mono', monospace; 
+        }
+
         /* SIDEBAR */
-        .sidebar { width: 260px; background: #000; border-right: 1px solid #1a1a1a; padding: 25px; flex-shrink: 0; display: flex; flex-direction: column; }
-        .logo-container { text-align: center; margin-bottom: 40px; }
-        .logo-img { width: 130px; }
-        .nav-item { color: #666; text-decoration: none; display: block; margin-bottom: 20px; font-family: 'Orbitron'; font-size: 11px; transition: 0.3s; letter-spacing: 1px; }
-        .nav-item:hover, .nav-item.active { color: var(--neon); }
+        .sidebar { width: 240px; background: #000; border-right: 1px solid #1a1a1a; padding: 25px; flex-shrink: 0; }
+        .nav-item { 
+            color: #666; text-decoration: none; display: block; 
+            margin-bottom: 20px; font-family: 'Orbitron'; font-size: 11px; 
+            letter-spacing: 1px;
+        }
+        .nav-item.active { color: #33c95c; }
 
-        /* MAIN CONTENT */
-        .main { flex: 1; padding: 25px; overflow-y: auto; background: radial-gradient(circle at 50% 50%, #0a0a0a 0%, #050505 100%); }
-        
-        /* TECHNICAL CHART (IL CUORE) */
-        .tech-chart-container { background: var(--card-bg); border: 1px solid #1a1a1a; padding: 20px; margin-bottom: 25px; min-height: 400px; }
-        .chart-header { font-family: 'Orbitron'; font-size: 10px; color: var(--neon); margin-bottom: 15px; display: flex; justify-content: space-between; }
+        /* AREA CONTENUTI */
+        .main { 
+            flex: 1; padding: 20px; 
+            display: flex; flex-direction: column; 
+            overflow-y: auto; /* Permette lo scroll solo qui dentro */
+        }
 
-        /* SESSION TABLE */
-        .table-container { background: var(--card-bg); border: 1px solid #1a1a1a; padding: 20px; }
+        /* BOX GRAFICO TECNICO (BLOCCATO) */
+        .tech-chart-box { 
+            background: #0f0f0f; border: 1px solid #1a1a1a; 
+            padding: 20px; margin-bottom: 25px; 
+            flex-shrink: 0; /* Impedisce al grafico di restringersi */
+            height: 450px; /* ALTEZZA FISSA PER EVITARE CASCATA */
+            display: flex; flex-direction: column;
+        }
+
+        .canvas-container { flex: 1; position: relative; min-height: 0; }
+
+        /* TABELLA SESSIONI */
+        .table-container { 
+            background: #0f0f0f; border: 1px solid #1a1a1a; 
+            padding: 20px; flex: 1; 
+        }
+
         table { width: 100%; border-collapse: collapse; font-size: 12px; }
-        th { text-align: left; padding: 12px; border-bottom: 1px solid #333; color: var(--neon); font-family: 'Orbitron'; font-size: 10px; }
+        th { 
+            text-align: left; padding: 12px; border-bottom: 1px solid #333; 
+            color: #33c95c; font-family: 'Orbitron'; font-size: 10px; 
+        }
         td { padding: 12px; border-bottom: 1px solid #1a1a1a; color: #ccc; }
         tr:hover { background: rgba(51, 201, 92, 0.05); }
 
         .btn-review { 
-            background: transparent; border: 1px solid var(--neon); color: var(--neon); 
-            padding: 5px 10px; font-family: 'Orbitron'; font-size: 9px; cursor: pointer; transition: 0.3s;
+            background: transparent; border: 1px solid #33c95c; color: #33c95c; 
+            padding: 5px 10px; font-family: 'Orbitron'; font-size: 9px; cursor: pointer; 
         }
-        .btn-review:hover { background: var(--neon); color: black; }
+        
+        h4 { font-family: 'Orbitron'; font-size: 10px; color: #33c95c; margin: 0 0 15px 0; }
     </style>
 </head>
 <body>
 
     <div class="sidebar">
-        <div class="logo-container">
-            <img src="logotop.png" alt="EV_MAXIMIZER" class="logo-img">
+        <div style="margin-bottom:40px; text-align:center;">
+            <img src="logotop.png" style="width:120px;">
         </div>
         <a href="dashboard.html" class="nav-item">TERMINAL_DASHBOARD</a>
         <a href="sessions.html" class="nav-item active">MY_SESSIONS</a>
@@ -49,15 +77,15 @@
     </div>
 
     <div class="main">
-        <div class="tech-chart-container">
-            <div class="chart-header">
-                <span>MULTILINE_PERFORMANCE_ANALYSIS (NET/EV/RED/BLUE)</span>
+        <div class="tech-chart-box">
+            <h4>TECHNICAL_PERFORMANCE_ANALYSIS (NET/EV/RED/BLUE)</h4>
+            <div class="canvas-container">
+                <canvas id="techChart"></canvas>
             </div>
-            <canvas id="techChart"></canvas>
         </div>
 
         <div class="table-container">
-            <div class="chart-header"><span>RECENT_SESSION_LOG</span></div>
+            <h4>RECENT_SESSION_LOG</h4>
             <table>
                 <thead>
                     <tr>
@@ -77,7 +105,7 @@
     <script>
         let techChart;
 
-        function initTechChart() {
+        function initChart() {
             const ctx = document.getElementById('techChart').getContext('2d');
             techChart = new Chart(ctx, {
                 type: 'line',
@@ -86,34 +114,32 @@
                     datasets: [
                         { label: 'NET WON', data: [], borderColor: '#33c95c', borderWidth: 2, pointRadius: 0, tension: 0.1 },
                         { label: 'ALL-IN EV', data: [], borderColor: '#ffff44', borderWidth: 2, pointRadius: 0, tension: 0.1 },
-                        { label: 'NON-SHOWDOWN (RED)', data: [], borderColor: '#ff4444', borderWidth: 1, pointRadius: 0, tension: 0.1 },
-                        { label: 'SHOWDOWN (BLUE)', data: [], borderColor: '#4444ff', borderWidth: 1, pointRadius: 0, tension: 0.1 }
+                        { label: 'RED LINE', data: [], borderColor: '#ff4444', borderWidth: 1, pointRadius: 0, tension: 0.1 },
+                        { label: 'BLUE LINE', data: [], borderColor: '#4444ff', borderWidth: 1, pointRadius: 0, tension: 0.1 }
                     ]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     scales: {
-                        y: { grid: { color: '#1a1a1a' }, ticks: { color: '#666', font: { family: 'Share Tech Mono' } } },
-                        x: { grid: { color: '#1a1a1a' }, ticks: { color: '#666', font: { family: 'Share Tech Mono' } } }
+                        y: { grid: { color: '#1a1a1a' }, ticks: { color: '#666' } },
+                        x: { grid: { color: '#1a1a1a' }, ticks: { color: '#666' } }
                     },
-                    plugins: { 
-                        legend: { labels: { color: '#ccc', font: { family: 'Orbitron', size: 9 } } } 
-                    }
+                    plugins: { legend: { labels: { color: '#ccc', font: { family: 'Orbitron', size: 9 } } } }
                 }
             });
         }
 
-        async function loadSessions() {
+        async function loadData() {
             try {
-                const response = await fetch('http://127.0.0.1:5000/get-sessions');
-                const data = await response.json();
-                if (data.status !== "success") return;
+                const res = await fetch('http://127.0.0.1:5000/get-sessions');
+                const d = await res.json();
+                if (d.status !== "success") return;
 
-                // 1. Popola la Tabella
+                // Aggiorna Tabella
                 const tbody = document.getElementById('session-table-body');
                 tbody.innerHTML = "";
-                data.sessions.forEach(s => {
+                d.sessions.forEach(s => {
                     tbody.innerHTML += `
                         <tr>
                             <td>${s.date}</td>
@@ -124,26 +150,19 @@
                         </tr>`;
                 });
 
-                // 2. Popola il Grafico a 4 Linee (Sincronizzato con app.py)
-                if (techChart && data.chart_data) {
-                    techChart.data.labels = data.chart_data.labels;
-                    techChart.data.datasets[0].data = data.chart_data.net;
-                    techChart.data.datasets[1].data = data.chart_data.ev;
-                    techChart.data.datasets[2].data = data.chart_data.red;
-                    techChart.data.datasets[3].data = data.chart_data.blue;
+                // Aggiorna Grafico
+                if (d.chart_data) {
+                    techChart.data.labels = d.chart_data.labels;
+                    techChart.data.datasets[0].data = d.chart_data.net;
+                    techChart.data.datasets[1].data = d.chart_data.ev;
+                    techChart.data.datasets[2].data = d.chart_data.red;
+                    techChart.data.datasets[3].data = d.chart_data.blue;
                     techChart.update();
                 }
-            } catch (e) { 
-                console.error("Errore caricamento sessioni:", e); 
-            }
+            } catch (e) { console.log("DB Offline"); }
         }
 
-        // Avvio
-        initTechChart();
-        loadSessions();
-
-        // Refresh ogni 30 secondi
-        setInterval(loadSessions, 30000);
+        window.onload = () => { initChart(); loadData(); };
     </script>
 </body>
 </html>
