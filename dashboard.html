@@ -93,10 +93,10 @@
         </div>
     </div>
 
-    <script>
+  <script>
         let perfChart, volumeChart;
 
-        // Orologio di sistema
+        // Orologio digitale Orbitron
         function updateClock() {
             const now = new Date();
             document.getElementById('clock').innerText = now.getHours().toString().padStart(2, '0') + ':' + 
@@ -104,13 +104,6 @@
                 now.getSeconds().toString().padStart(2, '0');
         }
         setInterval(updateClock, 1000);
-
-        // Log nel mini terminale
-        function log(msg) {
-            const logDiv = document.getElementById('terminal-log');
-            logDiv.innerHTML += `<div>> ${msg}</div>`;
-            logDiv.scrollTop = logDiv.scrollHeight;
-        }
 
         function initCharts() {
             const commonOptions = {
@@ -123,6 +116,7 @@
                 }
             };
 
+            // Grafico Linea (Performance)
             const ctx1 = document.getElementById('performanceChart').getContext('2d');
             perfChart = new Chart(ctx1, {
                 type: 'line',
@@ -142,13 +136,14 @@
                 options: commonOptions
             });
 
+            // Grafico Barre (Volumi)
             const ctx2 = document.getElementById('volumeChart').getContext('2d');
             volumeChart = new Chart(ctx2, {
                 type: 'bar',
                 data: {
                     labels: [],
                     datasets: [{
-                        label: 'Profit/Loss',
+                        label: 'Session Profit',
                         data: [],
                         backgroundColor: '#33c95c'
                     }]
@@ -158,40 +153,36 @@
         }
 
         async function loadDataFromDB() {
-    try {
-        const response = await fetch('http://127.0.0.1:5000/get-stats');
-        const data = await response.json();
-        
-        if (data.status === "success" && data.labels.length > 0) {
-            // 1. Sostituisci i valori nelle Card
-            document.getElementById('total-profit').innerText = "€ " + data.total_profit.toFixed(2);
-            document.getElementById('vpip-val').innerText = data.avg_vpip + "%";
-            document.getElementById('hands-val').innerText = data.total_hands;
-            document.getElementById('sessions-val').innerText = data.labels.length;
+            try {
+                const response = await fetch('http://127.0.0.1:5000/get-stats');
+                const data = await response.json();
+                
+                if (data.status === "success" && data.labels && data.labels.length > 0) {
+                    // Mapping dati sulle card originali
+                    document.getElementById('total-profit').innerText = "€ " + data.total_profit.toFixed(2);
+                    document.getElementById('vpip-val').innerText = data.avg_vpip + "%";
+                    document.getElementById('hands-val').innerText = data.total_hands;
+                    document.getElementById('sessions-val').innerText = data.labels.length;
 
-            // 2. SOSTITUISCI i dati del grafico (non aggiungere, sostituisci!)
-            perfChart.data.labels = data.labels;
-            perfChart.data.datasets[0].data = data.net;
-            
-            // 3. Forza l'aggiornamento senza animazione per evitare il glitch verticale
-            perfChart.update('none');
+                    // Aggiornamento Grafico Performance (Linea)
+                    perfChart.data.labels = data.labels;
+                    perfChart.data.datasets[0].data = data.net;
+                    perfChart.update('none'); // Fix: 'none' impedisce il glitch verticale
 
-            // 4. Aggiorna il secondo grafico se presente
-            if(volumeChart) {
-                volumeChart.data.labels = data.labels;
-                volumeChart.data.datasets[0].data = data.profits_raw;
-                volumeChart.update('none');
-            }
-        }
-    } catch (err) {
-        console.error("Errore di sincronizzazione:", err);
+                    // Aggiornamento Grafico Volumi (Barre)
+                    volumeChart.data.labels = data.labels;
+                    volumeChart.data.datasets[0].data = data.profits_raw;
+                    volumeChart.update('none');
+                }
+            } catch (err) {
+                console.error("Errore fetch dati:", err);
             }
         }
 
         window.onload = () => {
             initCharts();
             loadDataFromDB();
-            setInterval(loadDataFromDB, 5000);
+            setInterval(loadDataFromDB, 5000); // Sync ogni 5 secondi
             updateClock();
         };
 
