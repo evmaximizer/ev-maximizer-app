@@ -2,106 +2,143 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <title>EV Maximizer - Technical Analysis</title>
+    <title>EV Maximizer - My Sessions</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <style>
-        :root { --neon: #33c95c; --bg: #050505; --card: #0f0f0f; --yellow: #ffcc00; --red: #ff4444; --blue: #0077ff; }
+        :root { --neon: #33c95c; --bg: #050505; --card-bg: #0f0f0f; --red: #ff4444; --blue: #4444ff; --ev: #ffff44; }
         body { background: var(--bg); color: white; font-family: 'Share Tech Mono'; margin: 0; display: flex; height: 100vh; overflow: hidden; }
         
-        .sidebar { width: 260px; background: #000; border-right: 1px solid #1a1a1a; padding: 25px; flex-shrink: 0; }
-        .main { flex: 1; padding: 25px; overflow-y: auto; display: flex; flex-direction: column; }
-        
-        /* Box Grafico Tecnico */
-        .tech-chart-container { 
-            background: var(--card); 
-            border: 1px solid #1a1a1a; 
-            padding: 20px; 
-            height: 450px; 
-            margin-bottom: 30px; 
-            position: relative;
-        }
+        /* SIDEBAR */
+        .sidebar { width: 260px; background: #000; border-right: 1px solid #1a1a1a; padding: 25px; display: flex; flex-direction: column; flex-shrink: 0; }
+        .logo-container { text-align: center; margin-bottom: 40px; }
+        .logo-img { width: 130px; }
+        .nav-item { color: #666; text-decoration: none; display: block; margin-bottom: 20px; font-family: 'Orbitron'; font-size: 11px; transition: 0.3s; letter-spacing: 1px; }
+        .nav-item:hover, .nav-item.active { color: var(--neon); }
 
-        .table-container { background: var(--card); border: 1px solid #1a1a1a; padding: 15px; }
-        table { width: 100%; border-collapse: collapse; font-size: 13px; }
-        th { text-align: left; color: var(--neon); font-family: 'Orbitron'; font-size: 10px; padding: 12px; border-bottom: 1px solid #1a1a1a; }
-        td { padding: 12px; border-bottom: 1px solid #0a0a0a; }
+        /* MAIN CONTENT */
+        .main { flex: 1; padding: 25px; display: flex; flex-direction: column; overflow-y: auto; background: radial-gradient(circle at 50% 50%, #0a0a0a 0%, #050505 100%); }
         
-        .nav-item { color: #666; text-decoration: none; display: block; margin-bottom: 20px; font-family: 'Orbitron'; font-size: 11px; }
-        .nav-item.active { color: var(--neon); }
+        /* TECHNICAL CHART */
+        .tech-chart-container { background: var(--card-bg); border: 1px solid #1a1a1a; padding: 20px; margin-bottom: 25px; min-height: 450px; }
+        .chart-header { font-family: 'Orbitron'; font-size: 10px; color: var(--neon); margin-bottom: 15px; display: flex; justify-content: space-between; }
+
+        /* SESSION TABLE */
+        .table-container { background: var(--card-bg); border: 1px solid #1a1a1a; padding: 20px; }
+        table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        th { text-align: left; padding: 12px; border-bottom: 1px solid #333; color: var(--neon); font-family: 'Orbitron'; font-size: 10px; }
+        td { padding: 12px; border-bottom: 1px solid #1a1a1a; color: #ccc; }
+        tr:hover { background: rgba(51, 201, 92, 0.05); }
+
+        .btn-review { 
+            background: transparent; border: 1px solid var(--neon); color: var(--neon); 
+            padding: 5px 10px; font-family: 'Orbitron'; font-size: 9px; cursor: pointer; transition: 0.3s;
+        }
+        .btn-review:hover { background: var(--neon); color: black; }
     </style>
 </head>
 <body>
+
     <div class="sidebar">
-    <img src="logotop.png" style="width: 130px; margin-bottom: 50px; display: block; margin-left: auto; margin-right: auto;">
-    
-    <a href="dashboard.html" class="nav-item" id="nav-dash">TERMINAL_DASHBOARD</a>
-    
-    <a href="sessions.html" class="nav-item" id="nav-sessions">MY_SESSIONS</a>
-    <a href="evo.html" class="nav-item" id="nav-evo">EVO_COACH_AI</a>
-    <a href="settings.html" class="nav-item" id="nav-settings">ACCOUNT_SETTINGS</a>
-</div>
+        <div class="logo-container">
+            <img src="logotop.png" alt="EV_MAXIMIZER" class="logo-img">
+        </div>
+        <a href="dashboard.html" class="nav-item">TERMINAL_DASHBOARD</a>
+        <a href="sessions.html" class="nav-item active">MY_SESSIONS</a>
+        <a href="evo.html" class="nav-item">EVO_COACH_AI</a>
+        <a href="settings.html" class="nav-item">ACCOUNT_SETTINGS</a>
+    </div>
 
     <div class="main">
-        <h2 style="font-family: 'Orbitron'; margin-bottom: 20px;">TECHNICAL_PERFORMANCE_GRAPH</h2>
-        
         <div class="tech-chart-container">
+            <div class="chart-header">
+                <span>MULTILINE_PERFORMANCE_ANALYSIS (NET/EV/RED/BLUE)</span>
+            </div>
             <canvas id="techChart"></canvas>
         </div>
 
         <div class="table-container">
-            <h3 style="font-family: 'Orbitron'; font-size: 12px; color: var(--neon);">RECENT_SESSIONS_LOG</h3>
+            <div class="chart-header"><span>RECENT_SESSION_LOG</span></div>
             <table>
                 <thead>
                     <tr>
-                        <th>DATA</th>
-                        <th>ROOM</th>
+                        <th>DATE</th>
                         <th>HANDS</th>
-                        <th>WSD %</th>
-                        <th>NET PROFIT</th>
-                        <th>EV PROFIT</th>
+                        <th>NET_PROFIT</th>
+                        <th>VPIP</th>
+                        <th>ACTION</th>
                     </tr>
                 </thead>
-                <tbody id="session-rows">
+                <tbody id="session-table-body">
                     </tbody>
             </table>
         </div>
     </div>
 
     <script>
-        async function initTechChart() {
-            const ctx = document.getElementById('techChart').getContext('2d');
-            
-            // Chiamata al backend per i dati delle 4 linee
-            const response = await fetch('http://127.0.0.1:5000/get-tech-stats');
-            const data = await response.json();
+        let techChart;
 
-            new Chart(ctx, {
+        function initTechChart() {
+            const ctx = document.getElementById('techChart').getContext('2d');
+            techChart = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: data.labels, // Numero mani o date
+                    labels: [],
                     datasets: [
-                        { label: 'Net Won', data: data.net, borderColor: '#33c95c', borderWidth: 2, pointRadius: 0, tension: 0.1 },
-                        { label: 'All-In Eq', data: data.ev, borderColor: '#ffcc00', borderWidth: 2, pointRadius: 0, tension: 0.1 },
-                        { label: 'Non-Showdown', data: data.red, borderColor: '#ff4444', borderWidth: 1.5, pointRadius: 0, borderDash: [5, 5] },
-                        { label: 'Showdown', data: data.blue, borderColor: '#0077ff', borderWidth: 1.5, pointRadius: 0 }
+                        { label: 'NET WON', data: [], borderColor: '#33c95c', borderWidth: 2, pointRadius: 0, tension: 0.1 },
+                        { label: 'ALL-IN EV', data: [], borderColor: '#ffff44', borderWidth: 2, pointRadius: 0, tension: 0.1 },
+                        { label: 'NON-SHOWDOWN (RED)', data: [], borderColor: '#ff4444', borderWidth: 1, pointRadius: 0, tension: 0.1 },
+                        { label: 'SHOWDOWN (BLUE)', data: [], borderColor: '#4444ff', borderWidth: 1, pointRadius: 0, tension: 0.1 }
                     ]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: true, labels: { color: '#666', font: { family: 'Orbitron', size: 10 } } }
-                    },
                     scales: {
-                        x: { grid: { color: '#1a1a1a' }, ticks: { color: '#444' } },
-                        y: { grid: { color: '#1a1a1a' }, ticks: { color: '#444' } }
-                    }
+                        y: { grid: { color: '#1a1a1a' }, ticks: { color: '#666' } },
+                        x: { grid: { color: '#1a1a1a' }, ticks: { color: '#666' } }
+                    },
+                    plugins: { legend: { labels: { color: '#ccc', font: { family: 'Orbitron', size: 9 } } } }
                 }
             });
         }
 
-        window.onload = initTechChart;
+        async function loadSessions() {
+            try {
+                // Chiamata all'endpoint reale
+                const response = await fetch('http://127.0.0.1:5000/get-stats');
+                const data = await response.json();
+
+                if (data.status === "success") {
+                    // 1. Popola la Tabella (Dati Reali)
+                    const tbody = document.getElementById('session-table-body');
+                    tbody.innerHTML = `
+                        <tr>
+                            <td>LATEST_IMPORT</td>
+                            <td>${data.total_hands}</td>
+                            <td style="color: ${data.total_profit >= 0 ? '#33c95c' : '#ff4444'}">€ ${data.total_profit.toFixed(2)}</td>
+                            <td>${data.avg_vpip}%</td>
+                            <td><button class="btn-review" onclick="location.href='evo.html'">REVIEW_AI</button></td>
+                        </tr>
+                    `;
+
+                    // 2. Popola il Grafico Tecnico
+                    // Al momento usiamo i dati reali del NET e simuliamo gli altri tre
+                    // fino a quando non implementiamo il calcolo EV mano per mano.
+                    techChart.data.labels = data.labels;
+                    techChart.data.datasets[0].data = data.net; // Reale
+                    techChart.data.datasets[1].data = data.net.map(v => v * 0.95); // Simulazione EV
+                    techChart.data.datasets[2].data = data.net.map(v => v * -0.3); // Simulazione Red Line
+                    techChart.data.datasets[3].data = data.net.map(v => v * 1.3);  // Simulazione Blue Line
+                    techChart.update();
+                }
+            } catch (error) {
+                console.error("Errore caricamento sessioni:", error);
+            }
+        }
+
+        initTechChart();
+        loadSessions();
     </script>
 </body>
 </html>
