@@ -8,28 +8,62 @@
     <style>
         :root { --neon: #33c95c; --bg: #050505; --card-bg: #0f0f0f; }
         body { background: var(--bg); color: white; font-family: 'Share Tech Mono'; margin: 0; display: flex; height: 100vh; overflow: hidden; }
+        
+        /* SIDEBAR */
         .sidebar { width: 260px; background: #000; border-right: 1px solid #1a1a1a; padding: 25px; flex-shrink: 0; }
         .nav-item { color: #666; text-decoration: none; display: block; margin-bottom: 20px; font-family: 'Orbitron'; font-size: 11px; }
         .nav-item.active { color: var(--neon); }
-        .main { flex: 1; padding: 20px; overflow-y: auto; }
-        
-        .header-tools { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .buyin-select { background: #000; color: var(--neon); border: 1px solid var(--neon); padding: 5px 15px; font-family: 'Orbitron'; font-size: 10px; cursor: pointer; }
 
+        /* MAIN */
+        .main { flex: 1; padding: 20px; display: flex; flex-direction: column; overflow-y: auto; }
+        
+        .header-tools { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .buyin-select { background: #000; color: var(--neon); border: 1px solid var(--neon); padding: 5px 15px; font-family: 'Orbitron'; font-size: 10px; }
+
+        /* CARDS */
         .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px; }
-        .card { background: var(--card-bg); border-left: 2px solid var(--neon); padding: 15px; border: 1px solid #1a1a1a; }
+        .card { background: var(--card-bg); border: 1px solid #1a1a1a; border-left: 2px solid var(--neon); padding: 15px; }
         .card-label { font-size: 9px; color: #444; font-family: 'Orbitron'; }
         .card-value { font-size: 18px; color: #fff; margin-top: 5px; }
 
-        .charts-container { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
-        .chart-box { background: var(--card-bg); border: 1px solid #1a1a1a; padding: 15px; min-height: 300px; }
-        .small-charts { display: flex; flex-direction: column; gap: 20px; }
-        .small-chart-box { background: var(--card-bg); border: 1px solid #1a1a1a; padding: 15px; flex: 1; height: 200px; }
-        h4 { font-family: 'Orbitron'; font-size: 10px; color: var(--neon); margin: 0 0 10px 0; }
+        /* GRID DEI GRAFICI - CORRETTA PER EVITARE CASCATA */
+        .dashboard-grid { 
+            display: grid; 
+            grid-template-columns: 1.5fr 1fr; 
+            gap: 20px; 
+            flex: 1;
+            min-height: 0; /* Importante per contenere i figli */
+        }
+
+        .main-chart-box { 
+            background: var(--card-bg); 
+            border: 1px solid #1a1a1a; 
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .side-charts { 
+            display: grid;
+            grid-template-rows: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .small-chart-box { 
+            background: var(--card-bg); 
+            border: 1px solid #1a1a1a; 
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .canvas-container { flex: 1; position: relative; min-height: 180px; }
+        h4 { font-family: 'Orbitron'; font-size: 10px; color: var(--neon); margin: 0 0 10px 0; letter-spacing: 1px; }
     </style>
 </head>
 <body>
     <div class="sidebar">
+        <div style="text-align:center; margin-bottom:40px;"><img src="logotop.png" style="width:130px;"></div>
         <a href="dashboard.html" class="nav-item active">TERMINAL_DASHBOARD</a>
         <a href="sessions.html" class="nav-item">MY_SESSIONS</a>
         <a href="settings.html" class="nav-item">ACCOUNT_SETTINGS</a>
@@ -37,12 +71,11 @@
 
     <div class="main">
         <div class="header-tools">
-            <h2 style="font-family:'Orbitron'; font-size:14px; color:white;">SYSTEM_OVERVIEW</h2>
-            <select class="buyin-select" id="buyinFilter">
-                <option value="all">ALL_BUYINS</option>
-                <option value="5">€5.00</option>
-                <option value="10">€10.00</option>
-                <option value="20">€20.00</option>
+            <h2 style="font-family:'Orbitron'; font-size:14px; margin:0;">SYSTEM_DATA_OVERVIEW</h2>
+            <select class="buyin-select">
+                <option>ALL_BUYINS</option>
+                <option>€5.00</option>
+                <option>€10.00</option>
             </select>
         </div>
 
@@ -53,19 +86,26 @@
             <div class="card"><div class="card-label">SESSIONS</div><div class="card-value" id="sessions">0</div></div>
         </div>
 
-        <div class="charts-container">
-            <div class="chart-box">
-                <h4>CUMULATIVE_PROFIT</h4>
-                <canvas id="profitChart"></canvas>
+        <div class="dashboard-grid">
+            <div class="main-chart-box">
+                <h4>CUMULATIVE_PROFIT_EVOLUTION</h4>
+                <div class="canvas-container">
+                    <canvas id="profitChart"></canvas>
+                </div>
             </div>
-            <div class="small-charts">
+
+            <div class="side-charts">
                 <div class="small-chart-box">
                     <h4>BUYIN_DISTRIBUTION</h4>
-                    <canvas id="buyinChart"></canvas>
+                    <div class="canvas-container">
+                        <canvas id="buyinChart"></canvas>
+                    </div>
                 </div>
                 <div class="small-chart-box">
                     <h4>HANDS_PER_SESSION</h4>
-                    <canvas id="handsChart"></canvas>
+                    <div class="canvas-container">
+                        <canvas id="handsChart"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
@@ -75,55 +115,58 @@
         let charts = {};
 
         function initCharts() {
-            const commonOptions = { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } };
+            const opt = { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } };
             
+            // Profit Chart
             charts.profit = new Chart(document.getElementById('profitChart'), {
                 type: 'line',
-                data: { labels: [], datasets: [{ label: 'Profit', data: [], borderColor: '#33c95c', fill: true, backgroundColor: 'rgba(51,201,92,0.1)', tension: 0.3 }] },
-                options: commonOptions
+                data: { labels: [], datasets: [{ borderColor: '#33c95c', data: [], fill: true, backgroundColor: 'rgba(51,201,92,0.1)', tension: 0.3 }] },
+                options: opt
             });
 
+            // Buyin Chart
             charts.buyin = new Chart(document.getElementById('buyinChart'), {
                 type: 'bar',
-                data: { labels: [], datasets: [{ data: [], backgroundColor: '#33c95c' }] },
-                options: commonOptions
+                data: { labels: [], datasets: [{ backgroundColor: '#33c95c', data: [] }] },
+                options: opt
             });
 
+            // Hands Chart
             charts.hands = new Chart(document.getElementById('handsChart'), {
                 type: 'line',
-                data: { labels: [], datasets: [{ data: [], borderColor: '#4444ff', tension: 0.3 }] },
-                options: commonOptions
+                data: { labels: [], datasets: [{ borderColor: '#4444ff', data: [], tension: 0.3 }] },
+                options: opt
             });
         }
 
         async function updateDashboard() {
-            const res = await fetch('http://127.0.0.1:5000/get-stats');
-            const data = await res.json();
-            if(data.status !== "success") return;
+            try {
+                const res = await fetch('http://127.0.0.1:5000/get-stats');
+                const data = await res.json();
+                if(data.status !== "success") return;
 
-            document.getElementById('profit').innerText = `€ ${data.total_profit}`;
-            document.getElementById('vpip').innerText = `${data.avg_vpip}%`;
-            document.getElementById('hands').innerText = data.total_hands;
-            document.getElementById('sessions').innerText = data.count_tornei;
+                document.getElementById('profit').innerText = `€ ${data.total_profit}`;
+                document.getElementById('vpip').innerText = `${data.avg_vpip}%`;
+                document.getElementById('hands').innerText = data.total_hands;
+                document.getElementById('sessions').innerText = data.count_tornei;
 
-            // Update Profit Chart
-            charts.profit.data.labels = data.labels;
-            charts.profit.data.datasets[0].data = data.net_chart;
-            charts.profit.update();
+                charts.profit.data.labels = data.labels;
+                charts.profit.data.datasets[0].data = data.net_chart;
+                charts.profit.update();
 
-            // Update Buyin Chart
-            charts.buyin.data.labels = data.buyin_labels;
-            charts.buyin.data.datasets[0].data = data.buyin_chart;
-            charts.buyin.update();
+                charts.buyin.data.labels = data.buyin_labels;
+                charts.buyin.data.datasets[0].data = data.buyin_chart;
+                charts.buyin.update();
 
-            // Update Hands Chart
-            charts.hands.data.labels = data.labels;
-            charts.hands.data.datasets[0].data = data.hands_chart;
-            charts.hands.update();
+                charts.hands.data.labels = data.labels;
+                charts.hands.data.datasets[0].data = data.hands_chart;
+                charts.hands.update();
+            } catch(e) { console.log("Server non attivo"); }
         }
 
         initCharts();
         updateDashboard();
+        setInterval(updateDashboard, 10000);
     </script>
 </body>
 </html>
