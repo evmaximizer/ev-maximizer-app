@@ -158,31 +158,33 @@
         }
 
         async function loadDataFromDB() {
-            try {
-                const response = await fetch('http://127.0.0.1:5000/get-stats');
-                const data = await response.json();
-                
-                if (data.status === "success" && data.labels.length > 0) {
-                    // Aggiornamento Valori Numerici
-                    document.getElementById('total-profit').innerText = `€ ${data.total_profit.toFixed(2)}`;
-                    document.getElementById('vpip-val').innerText = `${data.avg_vpip}%`;
-                    document.getElementById('hands-val').innerText = data.total_hands;
-                    document.getElementById('sessions-val').innerText = data.labels.length;
+    try {
+        const response = await fetch('http://127.0.0.1:5000/get-stats');
+        const data = await response.json();
+        
+        if (data.status === "success" && data.labels.length > 0) {
+            // 1. Sostituisci i valori nelle Card
+            document.getElementById('total-profit').innerText = "€ " + data.total_profit.toFixed(2);
+            document.getElementById('vpip-val').innerText = data.avg_vpip + "%";
+            document.getElementById('hands-val').innerText = data.total_hands;
+            document.getElementById('sessions-val').innerText = data.labels.length;
 
-                    // Aggiornamento Grafico Performance
-                    perfChart.data.labels = data.labels;
-                    perfChart.data.datasets[0].data = data.net;
-                    perfChart.update('none');
+            // 2. SOSTITUISCI i dati del grafico (non aggiungere, sostituisci!)
+            perfChart.data.labels = data.labels;
+            perfChart.data.datasets[0].data = data.net;
+            
+            // 3. Forza l'aggiornamento senza animazione per evitare il glitch verticale
+            perfChart.update('none');
 
-                    // Aggiornamento Grafico Volumi
-                    volumeChart.data.labels = data.labels;
-                    volumeChart.data.datasets[0].data = data.profits_raw;
-                    volumeChart.update('none');
-                    
-                    log("DATA_SYNC_COMPLETED");
-                }
-            } catch (err) {
-                log("SYNC_ERROR: UNREACHABLE_SERVER");
+            // 4. Aggiorna il secondo grafico se presente
+            if(volumeChart) {
+                volumeChart.data.labels = data.labels;
+                volumeChart.data.datasets[0].data = data.profits_raw;
+                volumeChart.update('none');
+            }
+        }
+    } catch (err) {
+        console.error("Errore di sincronizzazione:", err);
             }
         }
 
