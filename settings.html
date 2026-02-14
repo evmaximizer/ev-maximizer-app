@@ -6,26 +6,34 @@
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <style>
         :root { --neon: #33c95c; --bg: #050505; --card: #0f0f0f; }
-        body { background: var(--bg); color: white; font-family: 'Share Tech Mono'; margin: 0; display: flex; height: 100vh; }
-        .sidebar { width: 260px; background: #000; border-right: 1px solid #1a1a1a; padding: 20px; }
+        body { background: var(--bg); color: white; font-family: 'Share Tech Mono'; margin: 0; display: flex; height: 100vh; overflow: hidden; }
+        
+        /* Sidebar Uniformata */
+        .sidebar { width: 260px; background: #000; border-right: 1px solid #1a1a1a; padding: 25px; flex-shrink: 0; }
+        .nav-item { color: #666; text-decoration: none; display: block; margin-bottom: 20px; font-family: 'Orbitron'; font-size: 11px; transition: 0.3s; cursor: pointer; }
+        .nav-item:hover, .nav-item.active { color: var(--neon); }
+
         .main { flex: 1; padding: 40px; overflow-y: auto; }
         .card { background: var(--card); border: 1px solid #1a1a1a; padding: 25px; margin-bottom: 20px; position: relative; }
         .card::before { content: ''; position: absolute; top:0; left:0; width:2px; height:100%; background: var(--neon); }
         .label { color: var(--neon); font-family: 'Orbitron'; font-size: 11px; display: block; margin-bottom: 10px; }
-        .input-box { width: 100%; background: #000; border: 1px solid #333; color: #00ff41; padding: 12px; margin-bottom: 15px; font-family: 'Share Tech Mono'; }
+        .input-box { width: 100%; background: #000; border: 1px solid #333; color: #00ff41; padding: 12px; margin-bottom: 15px; font-family: 'Share Tech Mono'; outline: none; }
         .btn { background: var(--neon); color: black; border: none; padding: 12px 25px; font-family: 'Orbitron'; font-size: 10px; font-weight: bold; cursor: pointer; }
         
-        /* Terminale spostato qui */
         #terminal-log { background: #000; border: 1px solid #1a1a1a; height: 150px; padding: 15px; color: var(--neon); font-size: 11px; overflow-y: auto; margin-top: 10px; }
-        #drop-zone { border: 2px dashed #222; padding: 30px; text-align: center; color: #444; margin-top: 20px; transition: 0.3s; }
+        #drop-zone { border: 2px dashed #222; padding: 30px; text-align: center; color: #444; margin-top: 20px; transition: 0.3s; cursor: pointer; }
         #drop-zone:hover { border-color: var(--neon); color: var(--neon); background: rgba(51,201,92,0.05); }
     </style>
 </head>
 <body>
+
     <div class="sidebar">
-        <img src="logotop.png" style="width: 140px; margin-bottom: 40px; display: block; margin-left: auto; margin-right: auto;">
-        <a href="dashboard1.html" style="color: #666; text-decoration: none; display: block; margin-bottom: 20px; font-family: 'Orbitron'; font-size: 11px;">DASHBOARD</a>
-        <a class="active" style="color: var(--neon); text-decoration: none; display: block; font-family: 'Orbitron'; font-size: 11px;">SYSTEM_SETTINGS</a>
+        <img src="logotop.png" style="width: 130px; margin-bottom: 50px; display: block; margin-left: auto; margin-right: auto;">
+        
+        <a href="dashboard.html" class="nav-item" id="nav-dash">TERMINAL_DASHBOARD</a>
+        <a href="sessions.html" class="nav-item" id="nav-sessions">MY_SESSIONS</a>
+        <a href="evo.html" class="nav-item" id="nav-evo">EVO_COACH_AI</a>
+        <a href="settings.html" class="nav-item active" id="nav-settings">ACCOUNT_SETTINGS</a>
     </div>
 
     <div class="main">
@@ -39,29 +47,66 @@
 
         <div class="card">
             <span class="label">MANUAL_IMPORT_ZONE</span>
-            <div id="drop-zone">TRASCINA QUI I FILE DI QUALSIASI PIATTAFORMA (.XML, .TXT)</div>
+            <div id="drop-zone" ondrop="handleDrop(event)" ondragover="event.preventDefault()">
+                TRASCINA QUI I FILE DI QUALSIASI PIATTAFORMA (.XML, .TXT)
+            </div>
         </div>
 
         <div class="card">
             <span class="label">SYSTEM_LOG_TERMINAL</span>
-            <div id="terminal-log">> AGGIORNA IL PERCORSO PER INIZIARE...</div>
+            <div id="terminal-log">> SISTEMA PRONTO. INSERISCI UN PERCORSO...</div>
         </div>
     </div>
 
     <script>
+        // Funzione per aggiornare i log nel terminale interno
+        function logToTerminal(msg, color = "var(--neon)") {
+            const log = document.getElementById('terminal-log');
+            log.innerHTML += `<div style="color: ${color};">> ${msg}</div>`;
+            log.scrollTop = log.scrollHeight;
+        }
+
+        // Invio del percorso al backend Python (app.py)
         async function updatePath() {
             const path = document.getElementById('hh-path').value;
-            const res = await fetch('http://127.0.0.1:5000/update-path', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ path: path })
-            });
-            const data = await res.json();
-            const log = document.getElementById('terminal-log');
-            if(data.status === "success") {
-                log.innerHTML += `<div style="color: #33c95c;">> MONITORAGGIO ATTIVATO: ${path}</div>`;
-            } else {
-                log.innerHTML += `<div style="color: #ff4444;">> ERRORE: Percorso non valido</div>`;
+            try {
+                const res = await fetch('http://127.0.0.1:5000/update-path', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ path: path })
+                });
+                const data = await res.json();
+                
+                if(data.status === "success") {
+                    logToTerminal("MONITORAGGIO ATTIVATO: " + path);
+                } else {
+                    logToTerminal("ERRORE: " + data.message, "#ff4444");
+                }
+            } catch (error) {
+                logToTerminal("ERRORE DI CONNESSIONE AL BACKEND (Verifica che app.py sia attivo)", "#ff4444");
+            }
+        }
+
+        // Gestione del Drop manuale dei file
+        async function handleDrop(e) {
+            e.preventDefault();
+            const files = Array.from(e.dataTransfer.files);
+            for (let file of files) {
+                logToTerminal("IMPORTAZIONE MANUALE: " + file.name.toUpperCase());
+                
+                const formData = new FormData();
+                formData.append('file', file);
+
+                try {
+                    const res = await fetch('http://127.0.0.1:5000/upload-hand', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const data = await res.json();
+                    logToTerminal("FILE ELABORATO CON SUCCESSO", "#00e5ff");
+                } catch (err) {
+                    logToTerminal("ERRORE UPLOAD FILE", "#ff4444");
+                }
             }
         }
     </script>
