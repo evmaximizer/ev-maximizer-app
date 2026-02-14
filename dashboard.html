@@ -2,142 +2,128 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <title>EV Maximizer - Terminal Dashboard</title>
+    <title>EV Maximizer - Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <style>
         :root { --neon: #33c95c; --bg: #050505; --card-bg: #0f0f0f; }
         body { background: var(--bg); color: white; font-family: 'Share Tech Mono'; margin: 0; display: flex; height: 100vh; overflow: hidden; }
+        .sidebar { width: 260px; background: #000; border-right: 1px solid #1a1a1a; padding: 25px; flex-shrink: 0; }
+        .nav-item { color: #666; text-decoration: none; display: block; margin-bottom: 20px; font-family: 'Orbitron'; font-size: 11px; }
+        .nav-item.active { color: var(--neon); }
+        .main { flex: 1; padding: 20px; overflow-y: auto; }
         
-        /* SIDEBAR UNIFORMATA */
-        .sidebar { width: 260px; background: #000; border-right: 1px solid #1a1a1a; padding: 25px; display: flex; flex-direction: column; flex-shrink: 0; }
-        .logo-container { text-align: center; margin-bottom: 40px; }
-        .logo-img { width: 130px; filter: drop-shadow(0 0 10px rgba(51, 201, 92, 0.3)); }
-        .nav-item { color: #666; text-decoration: none; display: block; margin-bottom: 20px; font-family: 'Orbitron'; font-size: 11px; transition: 0.3s; letter-spacing: 1px; }
-        .nav-item:hover, .nav-item.active { color: var(--neon); }
+        .header-tools { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .buyin-select { background: #000; color: var(--neon); border: 1px solid var(--neon); padding: 5px 15px; font-family: 'Orbitron'; font-size: 10px; cursor: pointer; }
 
-        /* MAIN CONTENT */
-        .main { flex: 1; padding: 25px; display: flex; flex-direction: column; background: radial-gradient(circle at 50% 50%, #0a0a0a 0%, #050505 100%); overflow-y: auto; }
-        
-        /* STATS GRID */
         .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px; }
-        .card { background: var(--card-bg); border: 1px solid #1a1a1a; padding: 15px; border-left: 2px solid var(--neon); }
-        .card-label { font-size: 9px; color: #444; margin-bottom: 5px; font-family: 'Orbitron'; }
-        .card-value { font-size: 18px; font-family: 'Orbitron'; color: #fff; }
+        .card { background: var(--card-bg); border-left: 2px solid var(--neon); padding: 15px; border: 1px solid #1a1a1a; }
+        .card-label { font-size: 9px; color: #444; font-family: 'Orbitron'; }
+        .card-value { font-size: 18px; color: #fff; margin-top: 5px; }
 
-        /* CHART CONTAINER */
-        .chart-container { background: var(--card-bg); border: 1px solid #1a1a1a; padding: 20px; flex: 1; min-height: 400px; position: relative; }
-        .chart-header { font-family: 'Orbitron'; font-size: 10px; color: var(--neon); margin-bottom: 15px; display: flex; justify-content: space-between; }
+        .charts-container { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
+        .chart-box { background: var(--card-bg); border: 1px solid #1a1a1a; padding: 15px; min-height: 300px; }
+        .small-charts { display: flex; flex-direction: column; gap: 20px; }
+        .small-chart-box { background: var(--card-bg); border: 1px solid #1a1a1a; padding: 15px; flex: 1; height: 200px; }
+        h4 { font-family: 'Orbitron'; font-size: 10px; color: var(--neon); margin: 0 0 10px 0; }
     </style>
 </head>
 <body>
-
     <div class="sidebar">
-        <div class="logo-container">
-            <img src="logotop.png" alt="EV_MAXIMIZER" class="logo-img">
-        </div>
         <a href="dashboard.html" class="nav-item active">TERMINAL_DASHBOARD</a>
         <a href="sessions.html" class="nav-item">MY_SESSIONS</a>
-        <a href="evo.html" class="nav-item">EVO_COACH_AI</a>
         <a href="settings.html" class="nav-item">ACCOUNT_SETTINGS</a>
     </div>
 
     <div class="main">
-        <div class="stats-grid">
-            <div class="card">
-                <div class="card-label">TOTAL_NET_PROFIT</div>
-                <div class="card-value" id="profit">€ 0.00</div>
-            </div>
-            <div class="card">
-                <div class="card-label">AVG_VPIP</div>
-                <div class="card-value" id="vpip">0.0%</div>
-            </div>
-            <div class="card">
-                <div class="card-label">AVG_PFR</div>
-                <div class="card-value" id="pfr">0.0%</div>
-            </div>
-            <div class="card">
-                <div class="card-label">TOTAL_HANDS</div>
-                <div class="card-value" id="hands">0</div>
-            </div>
+        <div class="header-tools">
+            <h2 style="font-family:'Orbitron'; font-size:14px; color:white;">SYSTEM_OVERVIEW</h2>
+            <select class="buyin-select" id="buyinFilter">
+                <option value="all">ALL_BUYINS</option>
+                <option value="5">€5.00</option>
+                <option value="10">€10.00</option>
+                <option value="20">€20.00</option>
+            </select>
         </div>
 
-        <div class="chart-container">
-            <div class="chart-header">
-                <span>CUMULATIVE_PROFIT_GRAPH</span>
-                <span id="sync-status" style="color: #444;">SYNC_READY</span>
+        <div class="stats-grid">
+            <div class="card"><div class="card-label">TOTAL_PROFIT</div><div class="card-value" id="profit">€ 0.00</div></div>
+            <div class="card"><div class="card-label">VPIP_AVG</div><div class="card-value" id="vpip">0.0%</div></div>
+            <div class="card"><div class="card-label">HANDS_COUNT</div><div class="card-value" id="hands">0</div></div>
+            <div class="card"><div class="card-label">SESSIONS</div><div class="card-value" id="sessions">0</div></div>
+        </div>
+
+        <div class="charts-container">
+            <div class="chart-box">
+                <h4>CUMULATIVE_PROFIT</h4>
+                <canvas id="profitChart"></canvas>
             </div>
-            <canvas id="mainChart"></canvas>
+            <div class="small-charts">
+                <div class="small-chart-box">
+                    <h4>BUYIN_DISTRIBUTION</h4>
+                    <canvas id="buyinChart"></canvas>
+                </div>
+                <div class="small-chart-box">
+                    <h4>HANDS_PER_SESSION</h4>
+                    <canvas id="handsChart"></canvas>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
-        let mainChart;
+        let charts = {};
 
-        // Inizializza il grafico vuoto
-        function initChart() {
-            const ctx = document.getElementById('mainChart').getContext('2d');
-            mainChart = new Chart(ctx, {
+        function initCharts() {
+            const commonOptions = { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } };
+            
+            charts.profit = new Chart(document.getElementById('profitChart'), {
                 type: 'line',
-                data: {
-                    labels: [],
-                    datasets: [{
-                        label: 'NET_PROFIT',
-                        data: [],
-                        borderColor: '#33c95c',
-                        backgroundColor: 'rgba(51, 201, 92, 0.1)',
-                        borderWidth: 2,
-                        fill: true,
-                        tension: 0.3,
-                        pointRadius: 2
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: { grid: { color: '#1a1a1a' }, ticks: { color: '#444', font: { family: 'Share Tech Mono' } } },
-                        x: { grid: { color: '#1a1a1a' }, ticks: { color: '#444', font: { family: 'Share Tech Mono' } } }
-                    },
-                    plugins: { legend: { display: false } }
-                }
+                data: { labels: [], datasets: [{ label: 'Profit', data: [], borderColor: '#33c95c', fill: true, backgroundColor: 'rgba(51,201,92,0.1)', tension: 0.3 }] },
+                options: commonOptions
+            });
+
+            charts.buyin = new Chart(document.getElementById('buyinChart'), {
+                type: 'bar',
+                data: { labels: [], datasets: [{ data: [], backgroundColor: '#33c95c' }] },
+                options: commonOptions
+            });
+
+            charts.hands = new Chart(document.getElementById('handsChart'), {
+                type: 'line',
+                data: { labels: [], datasets: [{ data: [], borderColor: '#4444ff', tension: 0.3 }] },
+                options: commonOptions
             });
         }
 
-        // Recupera i dati reali dal server Python
-        async function fetchDashboardData() {
-            try {
-                const response = await fetch('http://127.0.0.1:5000/get-stats');
-                const data = await response.json();
+        async function updateDashboard() {
+            const res = await fetch('http://127.0.0.1:5000/get-stats');
+            const data = await res.json();
+            if(data.status !== "success") return;
 
-                if (data.status === "success") {
-                    // Aggiorna le card con i dati del DB
-                    document.getElementById('profit').innerText = `€ ${data.total_profit.toFixed(2)}`;
-                    document.getElementById('vpip').innerText = `${data.avg_vpip}%`;
-                    document.getElementById('pfr').innerText = `19.2%`; // Placeholder finché non calcoliamo PFR specifico
-                    document.getElementById('hands').innerText = data.total_hands;
+            document.getElementById('profit').innerText = `€ ${data.total_profit}`;
+            document.getElementById('vpip').innerText = `${data.avg_vpip}%`;
+            document.getElementById('hands').innerText = data.total_hands;
+            document.getElementById('sessions').innerText = data.count_tornei;
 
-                    // Aggiorna il grafico
-                    mainChart.data.labels = data.labels;
-                    mainChart.data.datasets[0].data = data.net;
-                    mainChart.update();
-                    
-                    document.getElementById('sync-status').innerText = "DATABASE_CONNECTED";
-                    document.getElementById('sync-status').style.color = "#33c95c";
-                }
-            } catch (error) {
-                console.error("Errore FETCH:", error);
-                document.getElementById('sync-status').innerText = "CONNECTION_ERROR";
-                document.getElementById('sync-status').style.color = "#ff4444";
-            }
+            // Update Profit Chart
+            charts.profit.data.labels = data.labels;
+            charts.profit.data.datasets[0].data = data.net_chart;
+            charts.profit.update();
+
+            // Update Buyin Chart
+            charts.buyin.data.labels = data.buyin_labels;
+            charts.buyin.data.datasets[0].data = data.buyin_chart;
+            charts.buyin.update();
+
+            // Update Hands Chart
+            charts.hands.data.labels = data.labels;
+            charts.hands.data.datasets[0].data = data.hands_chart;
+            charts.hands.update();
         }
 
-        // Esegui all'avvio
-        initChart();
-        fetchDashboardData();
-
-        // Auto-refresh ogni 30 secondi per vedere i nuovi file caricati
-        setInterval(fetchDashboardData, 30000);
+        initCharts();
+        updateDashboard();
     </script>
 </body>
 </html>
