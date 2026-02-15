@@ -2,109 +2,64 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EV Maximizer - My Sessions</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
-    
     <style>
-        /* RESET E STRUTTURA FISSA */
         * { box-sizing: border-box; }
-        body { 
-            background: #050505; color: white; margin: 0; 
-            display: flex; height: 100vh; width: 100vw; overflow: hidden; 
-            font-family: 'Share Tech Mono', monospace; 
-        }
-
-        /* SIDEBAR */
+        body { background: #050505; color: white; margin: 0; display: flex; height: 100vh; width: 100vw; overflow: hidden; font-family: 'Share Tech Mono', monospace; }
         .sidebar { width: 240px; background: #000; border-right: 1px solid #1a1a1a; padding: 25px; flex-shrink: 0; }
-        .nav-item { 
-            color: #666; text-decoration: none; display: block; 
-            margin-bottom: 20px; font-family: 'Orbitron'; font-size: 11px; 
-            letter-spacing: 1px;
-        }
+        .nav-item { color: #666; text-decoration: none; display: block; margin-bottom: 20px; font-family: 'Orbitron'; font-size: 11px; }
         .nav-item.active { color: #33c95c; }
+        .main { flex: 1; padding: 20px; display: flex; flex-direction: column; overflow-y: auto; }
+        
+        .header-flex { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .buyin-filter { background: #000; border: 1px solid #33c95c; color: #33c95c; font-family: 'Orbitron'; font-size: 10px; padding: 5px; outline: none; }
 
-        /* AREA CONTENUTI */
-        .main { 
-            flex: 1; padding: 20px; 
-            display: flex; flex-direction: column; 
-            overflow-y: auto; /* Permette lo scroll solo qui dentro */
-        }
-
-        /* BOX GRAFICO TECNICO (BLOCCATO) */
-        .tech-chart-box { 
-            background: #0f0f0f; border: 1px solid #1a1a1a; 
-            padding: 20px; margin-bottom: 25px; 
-            flex-shrink: 0; /* Impedisce al grafico di restringersi */
-            height: 450px; /* ALTEZZA FISSA PER EVITARE CASCATA */
-            display: flex; flex-direction: column;
-        }
-
+        .tech-chart-box { background: #0f0f0f; border: 1px solid #1a1a1a; padding: 20px; margin-bottom: 25px; flex-shrink: 0; height: 400px; display: flex; flex-direction: column; }
         .canvas-container { flex: 1; position: relative; min-height: 0; }
-
-        /* TABELLA SESSIONI */
-        .table-container { 
-            background: #0f0f0f; border: 1px solid #1a1a1a; 
-            padding: 20px; flex: 1; 
-        }
-
+        .table-container { background: #0f0f0f; border: 1px solid #1a1a1a; padding: 20px; flex: 1; }
         table { width: 100%; border-collapse: collapse; font-size: 12px; }
-        th { 
-            text-align: left; padding: 12px; border-bottom: 1px solid #333; 
-            color: #33c95c; font-family: 'Orbitron'; font-size: 10px; 
-        }
+        th { text-align: left; padding: 12px; border-bottom: 1px solid #333; color: #33c95c; font-family: 'Orbitron'; font-size: 10px; }
         td { padding: 12px; border-bottom: 1px solid #1a1a1a; color: #ccc; }
         tr:hover { background: rgba(51, 201, 92, 0.05); }
-
-        .btn-review { 
-            background: transparent; border: 1px solid #33c95c; color: #33c95c; 
-            padding: 5px 10px; font-family: 'Orbitron'; font-size: 9px; cursor: pointer; 
-        }
-        
-        h4 { font-family: 'Orbitron'; font-size: 10px; color: #33c95c; margin: 0 0 15px 0; }
+        .btn-review { background: transparent; border: 1px solid #33c95c; color: #33c95c; padding: 5px 10px; font-family: 'Orbitron'; font-size: 9px; cursor: pointer; }
+        h4 { font-family: 'Orbitron'; font-size: 10px; color: #33c95c; margin: 0; }
     </style>
 </head>
 <body>
-
     <div class="sidebar">
-        <div style="margin-bottom:40px; text-align:center;">
-            <img src="logotop.png" style="width:120px;">
-        </div>
+        <div style="margin-bottom:40px; text-align:center;"><img src="logotop.png" style="width:120px;"></div>
         <a href="dashboard.html" class="nav-item">TERMINAL_DASHBOARD</a>
         <a href="sessions.html" class="nav-item active">MY_SESSIONS</a>
         <a href="settings.html" class="nav-item">ACCOUNT_SETTINGS</a>
     </div>
 
     <div class="main">
-        <div class="tech-chart-box">
+        <div class="header-flex">
             <h4>TECHNICAL_PERFORMANCE_ANALYSIS (NET/EV/RED/BLUE)</h4>
-            <div class="canvas-container">
-                <canvas id="techChart"></canvas>
-            </div>
+            <select id="buyinFilter" class="buyin-filter" onchange="loadData()">
+                <option value="all">ALL_BUYINS</option>
+                <option value="1">€1.00</option>
+                <option value="5">€5.00</option>
+            </select>
+        </div>
+
+        <div class="tech-chart-box">
+            <div class="canvas-container"><canvas id="techChart"></canvas></div>
         </div>
 
         <div class="table-container">
             <h4>RECENT_SESSION_LOG</h4>
             <table>
-                <thead>
-                    <tr>
-                        <th>DATE</th>
-                        <th>HANDS</th>
-                        <th>NET_PROFIT</th>
-                        <th>VPIP</th>
-                        <th>ACTION</th>
-                    </tr>
-                </thead>
-                <tbody id="session-table-body">
-                    </tbody>
+                <thead><tr><th>DATE</th><th>HANDS</th><th>NET_PROFIT</th><th>VPIP</th><th>ACTION</th></tr></thead>
+                <tbody id="session-table-body"></tbody>
             </table>
         </div>
     </div>
 
     <script>
         let techChart;
-
         function initChart() {
             const ctx = document.getElementById('techChart').getContext('2d');
             techChart = new Chart(ctx, {
@@ -112,31 +67,22 @@
                 data: {
                     labels: [],
                     datasets: [
-                        { label: 'NET WON', data: [], borderColor: '#33c95c', borderWidth: 2, pointRadius: 0, tension: 0.1 },
-                        { label: 'ALL-IN EV', data: [], borderColor: '#ffff44', borderWidth: 2, pointRadius: 0, tension: 0.1 },
-                        { label: 'RED LINE', data: [], borderColor: '#ff4444', borderWidth: 1, pointRadius: 0, tension: 0.1 },
-                        { label: 'BLUE LINE', data: [], borderColor: '#4444ff', borderWidth: 1, pointRadius: 0, tension: 0.1 }
+                        { label: 'NET WON', data: [], borderColor: '#33c95c', borderWidth: 2, pointRadius: 0 },
+                        { label: 'ALL-IN EV', data: [], borderColor: '#ffff44', borderWidth: 2, pointRadius: 0 },
+                        { label: 'RED LINE', data: [], borderColor: '#ff4444', borderWidth: 1, pointRadius: 0 },
+                        { label: 'BLUE LINE', data: [], borderColor: '#4444ff', borderWidth: 1, pointRadius: 0 }
                     ]
                 },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: { grid: { color: '#1a1a1a' }, ticks: { color: '#666' } },
-                        x: { grid: { color: '#1a1a1a' }, ticks: { color: '#666' } }
-                    },
-                    plugins: { legend: { labels: { color: '#ccc', font: { family: 'Orbitron', size: 9 } } } }
-                }
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#ccc', font: { family: 'Orbitron', size: 9 } } } } }
             });
         }
 
         async function loadData() {
             try {
-                const res = await fetch('http://127.0.0.1:5000/get-sessions');
+                const buyin = document.getElementById('buyinFilter').value;
+                const res = await fetch(`http://127.0.0.1:5000/get-sessions?buyin=${buyin}`);
                 const d = await res.json();
-                if (d.status !== "success") return;
-
-                // Aggiorna Tabella
+                
                 const tbody = document.getElementById('session-table-body');
                 tbody.innerHTML = "";
                 d.sessions.forEach(s => {
@@ -145,12 +91,11 @@
                             <td>${s.date}</td>
                             <td>${s.total_hands}</td>
                             <td style="color: ${s.net_profit >= 0 ? '#33c95c' : '#ff4444'}">€ ${s.net_profit.toFixed(2)}</td>
-                            <td>${s.vpip_avg}%</td>
+                            <td>${s.vpip}%</td>
                             <td><button class="btn-review">REVIEW_AI</button></td>
                         </tr>`;
                 });
 
-                // Aggiorna Grafico
                 if (d.chart_data) {
                     techChart.data.labels = d.chart_data.labels;
                     techChart.data.datasets[0].data = d.chart_data.net;
@@ -159,9 +104,8 @@
                     techChart.data.datasets[3].data = d.chart_data.blue;
                     techChart.update();
                 }
-            } catch (e) { console.log("DB Offline"); }
+            } catch (e) { console.log("Offline"); }
         }
-
         window.onload = () => { initChart(); loadData(); };
     </script>
 </body>

@@ -9,18 +9,18 @@
         :root { --neon: #33c95c; --bg: #050505; --card-bg: #0f0f0f; }
         * { box-sizing: border-box; }
         body { background: var(--bg); color: white; margin: 0; display: flex; height: 100vh; overflow: hidden; font-family: 'Share Tech Mono'; }
-
         .sidebar { width: 240px; background: #000; border-right: 1px solid #1a1a1a; padding: 25px; flex-shrink: 0; }
         .nav-item { color: #666; text-decoration: none; display: block; margin-bottom: 20px; font-family: 'Orbitron'; font-size: 11px; }
         .nav-item.active { color: var(--neon); }
-
         .main { flex: 1; padding: 20px; display: flex; flex-direction: column; overflow-y: auto; }
         .header-tools { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        
+        /* Stile Filtro */
+        .buyin-filter { background: #000; border: 1px solid var(--neon); color: var(--neon); font-family: 'Orbitron'; font-size: 10px; padding: 5px; outline: none; cursor: pointer; }
         
         .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px; }
         .card-stat { background: var(--card-bg); border: 1px solid #1a1a1a; border-left: 3px solid var(--neon); padding: 15px; }
         .value { font-size: 18px; font-family: 'Orbitron'; margin-top: 5px; }
-
         .dashboard-layout { display: grid; grid-template-columns: 1.8fr 1fr; gap: 20px; flex: 1; min-height: 500px; }
         .chart-box { background: var(--card-bg); border: 1px solid #1a1a1a; padding: 15px; display: flex; flex-direction: column; }
         .side-charts { display: grid; grid-template-rows: 1fr 1fr; gap: 20px; }
@@ -39,7 +39,14 @@
     <div class="main">
         <div class="header-tools">
             <h2 style="font-family:'Orbitron'; font-size:14px; margin:0;">SYSTEM_DATA_OVERVIEW</h2>
-            <div id="status" style="font-size:10px; color:red;">OFFLINE_DB</div>
+            <div>
+                <select id="buyinSelector" class="buyin-filter" onchange="update()">
+                    <option value="all">ALL_BUYINS</option>
+                    <option value="1">€1.00</option>
+                    <option value="5">€5.00</option>
+                </select>
+                <span id="status" style="font-size:10px; color:red; margin-left: 15px;">OFFLINE_DB</span>
+            </div>
         </div>
 
         <div class="stats-grid">
@@ -69,22 +76,18 @@
 
     <script>
         let charts = {};
-
         function init() {
             const opt = { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } };
-            
             charts.p = new Chart(document.getElementById('profitChart'), {
                 type: 'line',
                 data: { labels: [], datasets: [{ borderColor: '#33c95c', backgroundColor: 'rgba(51,201,92,0.1)', data: [], fill: true, tension: 0.3 }] },
                 options: opt
             });
-
             charts.b = new Chart(document.getElementById('buyinChart'), {
                 type: 'pie',
-                data: { labels: [], datasets: [{ data: [], backgroundColor: ['#33c95c', '#4444ff', '#ffff44'] }] },
+                data: { labels: [], datasets: [{ data: [], backgroundColor: ['#33c95c', '#4444ff', '#ffff44', '#ff4444'] }] },
                 options: { ...opt, plugins: { legend: { display: true, position: 'bottom', labels: { color: '#666', font: { size: 9 } } } } }
             });
-
             charts.h = new Chart(document.getElementById('handsChart'), {
                 type: 'line',
                 data: { labels: [], datasets: [{ borderColor: '#4444ff', data: [], tension: 0.3 }] },
@@ -94,7 +97,8 @@
 
         async function update() {
             try {
-                const res = await fetch('http://127.0.0.1:5000/get-stats');
+                const buyin = document.getElementById('buyinSelector').value;
+                const res = await fetch(`http://127.0.0.1:5000/get-stats?buyin=${buyin}`);
                 const d = await res.json();
                 
                 document.getElementById('status').innerText = "ONLINE_DB";
@@ -113,11 +117,10 @@
                 charts.b.update();
 
                 charts.h.data.labels = d.labels;
-                charts.h.data.datasets[0].data = d.hands_chart;
+                charts.h.data.datasets[0].data = d.hands_chart || [];
                 charts.h.update();
-            } catch(e) { document.getElementById('status').innerText = "OFFLINE_DB"; }
+            } catch(e) { document.getElementById('status').innerText = "OFFLINE_DB"; document.getElementById('status').style.color = "red"; }
         }
-
         window.onload = () => { init(); update(); setInterval(update, 10000); };
     </script>
 </body>
