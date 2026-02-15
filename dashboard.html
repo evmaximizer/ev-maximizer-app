@@ -1,127 +1,167 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-    <meta charset="UTF-8">
-    <title>EV Maximizer - Dashboard</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
-    <style>
-        :root { --neon: #33c95c; --bg: #050505; --card-bg: #0f0f0f; }
-        * { box-sizing: border-box; }
-        body { background: var(--bg); color: white; margin: 0; display: flex; height: 100vh; overflow: hidden; font-family: 'Share Tech Mono'; }
-        .sidebar { width: 240px; background: #000; border-right: 1px solid #1a1a1a; padding: 25px; flex-shrink: 0; }
-        .nav-item { color: #666; text-decoration: none; display: block; margin-bottom: 20px; font-family: 'Orbitron'; font-size: 11px; }
-        .nav-item.active { color: var(--neon); }
-        .main { flex: 1; padding: 20px; display: flex; flex-direction: column; overflow-y: auto; }
-        .header-tools { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        
-        /* Stile Filtro */
-        .buyin-filter { background: #000; border: 1px solid var(--neon); color: var(--neon); font-family: 'Orbitron'; font-size: 10px; padding: 5px; outline: none; cursor: pointer; }
-        
-        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px; }
-        .card-stat { background: var(--card-bg); border: 1px solid #1a1a1a; border-left: 3px solid var(--neon); padding: 15px; }
-        .value { font-size: 18px; font-family: 'Orbitron'; margin-top: 5px; }
-        .dashboard-layout { display: grid; grid-template-columns: 1.8fr 1fr; gap: 20px; flex: 1; min-height: 500px; }
-        .chart-box { background: var(--card-bg); border: 1px solid #1a1a1a; padding: 15px; display: flex; flex-direction: column; }
-        .side-charts { display: grid; grid-template-rows: 1fr 1fr; gap: 20px; }
-        .canvas-container { flex: 1; position: relative; min-height: 200px; }
-        h4 { font-family: 'Orbitron'; font-size: 10px; color: var(--neon); margin: 0 0 10px 0; }
-    </style>
+<meta charset="UTF-8">
+<title>EV Maximizer - Dashboard</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+
+<style>
+:root { --neon:#33c95c; --bg:#050505; --card:#0f0f0f; }
+*{box-sizing:border-box;}
+body{
+    background:var(--bg);
+    color:white;
+    margin:0;
+    display:flex;
+    height:100vh;
+    overflow:hidden;
+    font-family:'Share Tech Mono';
+}
+.sidebar{
+    width:240px;
+    background:#000;
+    border-right:1px solid #1a1a1a;
+    padding:25px;
+}
+.nav-item{
+    color:#666;
+    text-decoration:none;
+    display:block;
+    margin-bottom:20px;
+    font-family:'Orbitron';
+    font-size:11px;
+}
+.nav-item.active{color:var(--neon);}
+
+.main{
+    flex:1;
+    padding:20px;
+    display:flex;
+    flex-direction:column;
+    overflow-y:auto;
+}
+
+.stats-grid{
+    display:grid;
+    grid-template-columns:repeat(6,1fr);
+    gap:15px;
+    margin-bottom:20px;
+}
+
+.card{
+    background:var(--card);
+    border-left:3px solid var(--neon);
+    padding:15px;
+}
+
+.value{
+    font-family:'Orbitron';
+    font-size:16px;
+    margin-top:5px;
+}
+
+.chart-box{
+    background:var(--card);
+    padding:15px;
+    flex:1;
+}
+
+h4{
+    font-family:'Orbitron';
+    font-size:10px;
+    color:var(--neon);
+}
+</style>
 </head>
+
 <body>
-    <div class="sidebar">
-        <div style="text-align:center; margin-bottom:40px;"><img src="logotop.png" style="width:120px;"></div>
-        <a href="dashboard.html" class="nav-item active">TERMINAL_DASHBOARD</a>
-        <a href="sessions.html" class="nav-item">MY_SESSIONS</a>
-        <a href="settings.html" class="nav-item">ACCOUNT_SETTINGS</a>
+
+<div class="sidebar">
+    <div style="text-align:center;margin-bottom:40px;">
+        <img src="logotop.png" style="width:120px;">
+    </div>
+    <a href="dashboard.html" class="nav-item active">TERMINAL_DASHBOARD</a>
+    <a href="sessions.html" class="nav-item">MY_SESSIONS</a>
+</div>
+
+<div class="main">
+
+    <div style="display:flex;justify-content:space-between;margin-bottom:20px;">
+        <h2 style="font-family:'Orbitron';font-size:14px;">SYSTEM_DATA_OVERVIEW</h2>
+
+        <select id="buyinSelector" onchange="update()" 
+        style="background:black;border:1px solid var(--neon);color:var(--neon);font-family:'Orbitron';font-size:10px;">
+            <option value="all">ALL_BUYINS</option>
+            <option value="1">€1</option>
+            <option value="5">€5</option>
+        </select>
     </div>
 
-    <div class="main">
-        <div class="header-tools">
-            <h2 style="font-family:'Orbitron'; font-size:14px; margin:0;">SYSTEM_DATA_OVERVIEW</h2>
-            <div>
-                <select id="buyinSelector" class="buyin-filter" onchange="update()">
-                    <option value="all">ALL_BUYINS</option>
-                    <option value="1">€1.00</option>
-                    <option value="5">€5.00</option>
-                </select>
-                <span id="status" style="font-size:10px; color:red; margin-left: 15px;">OFFLINE_DB</span>
-            </div>
-        </div>
-
-        <div class="stats-grid">
-            <div class="card-stat"><div>PROFIT</div><div class="value" id="profit">€ 0.00</div></div>
-            <div class="card-stat"><div>VPIP</div><div class="value" id="vpip">0.0%</div></div>
-            <div class="card-stat"><div>HANDS</div><div class="value" id="hands">0</div></div>
-            <div class="card-stat"><div>GAMES</div><div class="value" id="sessions">0</div></div>
-        </div>
-
-        <div class="dashboard-layout">
-            <div class="chart-box">
-                <h4>CUMULATIVE_PROFIT</h4>
-                <div class="canvas-container"><canvas id="profitChart"></canvas></div>
-            </div>
-            <div class="side-charts">
-                <div class="chart-box">
-                    <h4>BUYIN_DISTRIBUTION (PIE)</h4>
-                    <div class="canvas-container"><canvas id="buyinChart"></canvas></div>
-                </div>
-                <div class="chart-box">
-                    <h4>HANDS_VOLUME</h4>
-                    <div class="canvas-container"><canvas id="handsChart"></canvas></div>
-                </div>
-            </div>
-        </div>
+    <div class="stats-grid">
+        <div class="card"><div>PROFIT</div><div class="value" id="profit">€0</div></div>
+        <div class="card"><div>ROI %</div><div class="value" id="roi">0%</div></div>
+        <div class="card"><div>VPIP</div><div class="value" id="vpip">0%</div></div>
+        <div class="card"><div>HANDS</div><div class="value" id="hands">0</div></div>
+        <div class="card"><div>CHIPS</div><div class="value" id="chips">0</div></div>
+        <div class="card"><div>EV DIFF</div><div class="value" id="evdiff">0</div></div>
     </div>
 
-    <script>
-        let charts = {};
-        function init() {
-            const opt = { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } };
-            charts.p = new Chart(document.getElementById('profitChart'), {
-                type: 'line',
-                data: { labels: [], datasets: [{ borderColor: '#33c95c', backgroundColor: 'rgba(51,201,92,0.1)', data: [], fill: true, tension: 0.3 }] },
-                options: opt
-            });
-            charts.b = new Chart(document.getElementById('buyinChart'), {
-                type: 'pie',
-                data: { labels: [], datasets: [{ data: [], backgroundColor: ['#33c95c', '#4444ff', '#ffff44', '#ff4444'] }] },
-                options: { ...opt, plugins: { legend: { display: true, position: 'bottom', labels: { color: '#666', font: { size: 9 } } } } }
-            });
-            charts.h = new Chart(document.getElementById('handsChart'), {
-                type: 'line',
-                data: { labels: [], datasets: [{ borderColor: '#4444ff', data: [], tension: 0.3 }] },
-                options: opt
-            });
+    <div class="chart-box">
+        <h4>PERFORMANCE_GRAPH</h4>
+        <canvas id="mainChart"></canvas>
+    </div>
+
+</div>
+
+<script>
+
+let chart;
+
+function init(){
+    chart = new Chart(document.getElementById("mainChart"),{
+        type:'line',
+        data:{
+            labels:[],
+            datasets:[
+                {label:"Net",borderColor:"#33c95c",data:[],tension:0.3},
+                {label:"EV",borderColor:"#ffaa00",data:[],tension:0.3},
+                {label:"Red Line",borderColor:"#ff4444",data:[],tension:0.3},
+                {label:"Blue Line",borderColor:"#4488ff",data:[],tension:0.3}
+            ]
+        },
+        options:{
+            responsive:true,
+            plugins:{legend:{labels:{color:"#888",font:{size:9}}}}
         }
+    });
+}
 
-        async function update() {
-            try {
-                const buyin = document.getElementById('buyinSelector').value;
-                const res = await fetch(`http://127.0.0.1:5000/get-stats?buyin=${buyin}`);
-                const d = await res.json();
-                
-                document.getElementById('status').innerText = "ONLINE_DB";
-                document.getElementById('status').style.color = "#33c95c";
-                document.getElementById('profit').innerText = `€ ${d.total_profit.toFixed(2)}`;
-                document.getElementById('vpip').innerText = `${d.avg_vpip}%`;
-                document.getElementById('hands').innerText = d.total_hands;
-                document.getElementById('sessions').innerText = d.count_tornei;
+async function update(){
+    const buyin=document.getElementById("buyinSelector").value;
+    const res=await fetch(`http://127.0.0.1:5000/get-stats?buyin=${buyin}`);
+    const d=await res.json();
 
-                charts.p.data.labels = d.labels;
-                charts.p.data.datasets[0].data = d.net_chart;
-                charts.p.update();
+    document.getElementById("profit").innerText="€"+d.total_profit.toFixed(2);
+    document.getElementById("vpip").innerText=d.avg_vpip+"%";
+    document.getElementById("hands").innerText=d.total_hands;
+    document.getElementById("chips").innerText=d.chips_total;
+    document.getElementById("evdiff").innerText=(d.chips_total-d.ev_total).toFixed(2);
 
-                charts.b.data.labels = d.buyin_labels;
-                charts.b.data.datasets[0].data = d.buyin_chart;
-                charts.b.update();
+    let roi = d.sessions ? ((d.total_profit/d.sessions)*100).toFixed(1) : 0;
+    document.getElementById("roi").innerText=roi+"%";
 
-                charts.h.data.labels = d.labels;
-                charts.h.data.datasets[0].data = d.hands_chart || [];
-                charts.h.update();
-            } catch(e) { document.getElementById('status').innerText = "OFFLINE_DB"; document.getElementById('status').style.color = "red"; }
-        }
-        window.onload = () => { init(); update(); setInterval(update, 10000); };
-    </script>
+    chart.data.labels=d.labels;
+    chart.data.datasets[0].data=d.net_chart;
+    chart.data.datasets[1].data=d.net_chart; 
+    chart.data.datasets[2].data=[]; 
+    chart.data.datasets[3].data=[]; 
+    chart.update();
+}
+
+window.onload=()=>{init();update();}
+</script>
+
 </body>
 </html>
